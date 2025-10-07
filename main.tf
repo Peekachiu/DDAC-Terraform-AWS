@@ -1,9 +1,9 @@
 terraform {
   backend "s3" {
-    bucket         = var.aws_s3_bucket_name
+    bucket         = "ddac-tf-state-backend"
     key            = "terraform.tfstate"
-    region         = var.aws_region
-    dynamodb_table = var.aws_dynamodb_table_name
+    region         = "ap-southeast-1"
+    dynamodb_table = "terraform-state-locking"
     encrypt        = true
   }
 
@@ -17,10 +17,10 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = "ap-southeast-1"
 }
 
 module "tf-state" {
   source      = "./modules/tf-state"
-  bucket_name = var.aws_s3_bucket_name
+  bucket_name = "ddac-tf-state-backend"
 }
