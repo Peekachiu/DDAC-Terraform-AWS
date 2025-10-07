@@ -48,7 +48,7 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Import existing S3 bucket
+      - name: Import existing S3 bucket & DynamoDB table
         run: |
           terraform import -no-color module.tf-state.aws_s3_bucket.terraform_state ddac-tf-state-backend || true
           terraform import -no-color module.tf-state.aws_dynamodb_table.terraform_locks terraform-state-locking || true
