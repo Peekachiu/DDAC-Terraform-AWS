@@ -6,7 +6,7 @@ terraform {
     dynamodb_table = var.aws_dynamodb_table_name
     encrypt        = true
   }
-  
+
   required_version = ">=1.5.0"
   required_providers {
     aws = {
