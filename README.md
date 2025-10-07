@@ -1,2 +1,8 @@
 # DDAC-Terraform-AWS
-This repo is to create an automated AWS deployment with Terraform
+" Cloud Infrastructure on AWS with automation of Terraform"
+
+! ! Tools used ! !
+- Visual Studio Code
+- Amazon Web Service (AWS)
+- Terraform
+
