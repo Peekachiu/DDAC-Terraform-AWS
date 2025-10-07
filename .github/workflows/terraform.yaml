@@ -8,6 +8,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      destroy:
+        description: "Set to true to destroy all resources"
+        required: false
+        default: "false"
 
 jobs:
   aws-credentials-test:
@@ -17,14 +22,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Test AWS CLI authentication
-        run: |
-          aws sts get-caller-identity
+        run: aws sts get-caller-identity
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   terraform:
-    name: "Terraform"
+    name: "Terraform Operations"
     runs-on: ubuntu-latest
     needs: aws-credentials-test
     env:
@@ -39,7 +43,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.4
-      
+
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
@@ -48,15 +52,16 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Import existing S3 bucket & DynamoDB table
-        run: |
-          terraform import -no-color module.tf-state.aws_s3_bucket.terraform_state ddac-tf-state-backend || true
-          terraform import -no-color module.tf-state.aws_dynamodb_table.terraform_locks terraform-state-locking || true
-
       - name: Terraform Plan
         id: plan
         run: terraform plan -out=tfplan
 
+      # ✅ Apply (only if destroy == false)
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
+        if: ${{ github.event.inputs.destroy != 'true' && github.ref == 'refs/heads/main' }}
         run: terraform apply -auto-approve tfplan
+
+      # 🧹 Destroy (only if destroy == true)
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.destroy == 'true' }}
+        run: terraform destroy -auto-approve
