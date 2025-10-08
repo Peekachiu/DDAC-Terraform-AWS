@@ -77,7 +77,11 @@ jobs:
             git commit -m "Auto format Terraform files"
             git push
           fi
-
+          
+      - name: Clean Terraform cache
+        run: |
+          rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
+          
       - name: Terraform Init with Backend
         run: terraform init -reconfigure
 
