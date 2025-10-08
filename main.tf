@@ -13,21 +13,14 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
-# The "tf-state" module is commented out to avoid re-creating the S3 bucket and DynamoDB table if they already exist.
-# It only needs to be run once to set up the backend infrastructure.
-
-module "tf-state" {
-  source      = "./modules/tf-state"
-  bucket_name = "ddac-tf-state-backend"
-}
 
 # --- VPC Module ---
 module "vpc" {
   source = "./modules/vpc"
 
-  vpc_name   = "ddac-VPC-01"
+  vpc_name = "ddac-VPC-01"
   cidr_block = "10.0.0.0/16"
-  azs        = ["ap-southeast-1a", "ap-southeast-1b"]
+  azs = ["ap-southeast-1a", "ap-southeast-1b"]
 
   public_subnets = [
     { name = "public-subnet-1", cidr = "10.0.1.0/24", az = "ap-southeast-1a" },
