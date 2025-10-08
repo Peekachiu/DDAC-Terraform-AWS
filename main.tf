@@ -1,5 +1,5 @@
 terraform {
-  
+
   required_version = ">=1.5.0"
   required_providers {
     aws = {
@@ -25,9 +25,9 @@ module "tf-state" {
 module "vpc" {
   source = "./modules/vpc"
 
-  vpc_name = "ddac-VPC-01"
+  vpc_name   = "ddac-VPC-01"
   cidr_block = "10.0.0.0/16"
-  azs = ["ap-southeast-1a", "ap-southeast-1b"]
+  azs        = ["ap-southeast-1a", "ap-southeast-1b"]
 
   public_subnets = [
     { name = "public-subnet-1", cidr = "10.0.1.0/24", az = "ap-southeast-1a" },
