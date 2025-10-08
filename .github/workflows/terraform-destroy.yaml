@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./   # ✅ Make sure it's the same as your main.tf and backend.tf
+        working-directory: ./ 
 
     steps:
       - name: Checkout repository
