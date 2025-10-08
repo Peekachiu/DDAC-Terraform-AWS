@@ -1,7 +1,7 @@
 name: Terraform Destroy
 
 on:
-  workflow_dispatch:  # Manual trigger only (for safety)
+  workflow_dispatch:  # Manual trigger only (safe)
 
 env:
   AWS_REGION: ap-southeast-1
@@ -10,6 +10,9 @@ jobs:
   destroy:
     name: Destroy Terraform Infrastructure
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./   # ✅ Make sure it's the same as your main.tf and backend.tf
 
     steps:
       - name: Checkout repository
@@ -27,8 +30,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Initialize Terraform with backend
+      - name: Initialize Terraform (load remote state)
         run: terraform init -reconfigure -upgrade
+
+      - name: Verify Terraform State (for debugging)
+        run: terraform state list || echo "⚠️ No resources found in Terraform state."
 
       - name: Terraform Validate
         run: terraform validate
