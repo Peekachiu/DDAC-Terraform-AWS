@@ -87,17 +87,17 @@ jobs:
         run: |
           rm -rf .terraform .terraform.lock.hcl terraform.tfstate terraform.tfstate.backup
 
-      - name: Terraform Format Check
+      - name: Terraform Format - Format Check
         run: terraform fmt -recursive
 
-      - name: Initialize Terraform (uses backend)
+      - name: Terraform Initial - Initialize (uses backend)
         run: terraform init -reconfigure -upgrade
 
-      - name: Validate Terraform configuration
+      - name: Terraform Validate - Validate configuration
         run: terraform validate
 
-      - name: Plan Terraform deployment
+      - name: Terraform Plan - Plan deployment
         run: terraform plan -out=tfplan
 
-      - name: Apply Terraform changes
+      - name: Terraform Apply - Apply changes
         run: terraform apply -auto-approve tfplan
