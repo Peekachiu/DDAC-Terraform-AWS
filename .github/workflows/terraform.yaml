@@ -47,3 +47,8 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve tfplan
+
+      - name: Show Terraform State
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: terraform state list || echo "No resources currently tracked in Terraform state."
+        
