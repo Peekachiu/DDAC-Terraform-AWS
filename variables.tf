@@ -11,7 +11,7 @@ variable "aws_region" {
 variable "vpc_name" {
   description = "Name of the VPC"
   type        = string
-  default     = "Strada-VPC"
+  default     = "DDAC-VPC"
 }
 
 variable "vpc_cidr" {

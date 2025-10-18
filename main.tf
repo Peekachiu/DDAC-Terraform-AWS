@@ -2,12 +2,14 @@
 # Root-Level Terraform Configuration for DDAC Project
 ############################################################
 terraform {
-
-  required_version = ">=1.5.0"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">= 3.0.0"
     }
   }
 }
@@ -43,4 +45,24 @@ module "vpc" {
   enable_nat_gateway = true          # Enables NAT Gateway for private subnet internet access
   enable_multi_nat   = true          # Set to true if you want one NAT per AZ (for HA)
   single_nat_index   = 0             # 0 = Use the first public subnet for NAT Gateway
+}
+
+############################################################
+# Security Groups Module
+############################################################
+# Detect the current public IP dynamically
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com/"
+}
+
+# Convert IP to CIDR format (e.g., 123.45.67.89 -> 123.45.67.89/32)
+locals {
+  admin_ip = "${chomp(data.http.my_ip.response_body)}/32"
+}
+
+module "security_groups" {
+  source   = "./modules/security_groups"
+  vpc_id   = module.vpc.vpc_id
+  vpc_name = var.vpc_name
+  admin_ip = local.admin_ip
 }
