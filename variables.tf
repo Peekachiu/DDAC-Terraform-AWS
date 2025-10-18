@@ -25,3 +25,9 @@ variable "availability_zones" {
   type        = list(string)
   default     = ["ap-southeast-1a", "ap-southeast-1b"]
 }
+
+variable "admin_ip_override" {
+  description = "Optional manual override for admin IP (e.g. 115.135.24.27/32). Leave empty to auto-detect."
+  type        = string
+  default     = ""
+}

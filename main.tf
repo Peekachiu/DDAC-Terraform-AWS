@@ -48,18 +48,25 @@ module "vpc" {
 }
 
 ############################################################
-# Security Groups Module
+# Dynamic Admin IP Detection (with Auto-Refresh Capability)
 ############################################################
-# Detect the current public IP dynamically
+
+# Fetch your current public IP
 data "http" "my_ip" {
   url = "https://checkip.amazonaws.com/"
 }
 
-# Convert IP to CIDR format (e.g., 123.45.67.89 -> 123.45.67.89/32)
+# Trim whitespace and format it as a CIDR block
 locals {
-  admin_ip = "${chomp(data.http.my_ip.response_body)}/32"
+  detected_admin_ip = "${chomp(data.http.my_ip.response_body)}/32"
+
+  # Allow manual override (e.g., when running from a CI/CD pipeline or VPN)
+  admin_ip = var.admin_ip_override != "" ? var.admin_ip_override : local.detected_admin_ip
 }
 
+############################################################
+# Security Groups Module
+############################################################
 module "security_groups" {
   source   = "./modules/security_groups"
   vpc_id   = module.vpc.vpc_id
