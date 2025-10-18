@@ -41,6 +41,6 @@ module "vpc" {
 
   # NAT Gateway Configuration
   enable_nat_gateway = true          # Enables NAT Gateway for private subnet internet access
-  enable_multi_nat   = false         # Set to true if you want one NAT per AZ (for HA)
+  enable_multi_nat   = true          # Set to true if you want one NAT per AZ (for HA)
   single_nat_index   = 0             # 0 = Use the first public subnet for NAT Gateway
 }
