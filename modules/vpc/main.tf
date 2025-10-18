@@ -81,7 +81,7 @@ resource "aws_route_table_association" "public_assoc" {
 }
 
 # -------------------------------
-# NAT Gateway (Configurable)
+# NAT Gateway
 # -------------------------------
 resource "aws_eip" "nat_eip" {
   count = var.enable_nat_gateway ? (var.enable_multi_nat ? length(var.public_subnets) : 1) : 0
@@ -98,9 +98,6 @@ resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip[count.index].id
   subnet_id = var.enable_multi_nat ? element(values(aws_subnet.public)[*].id, count.index) : element(values(aws_subnet.public)[*].id, var.single_nat_index)
     
-    
-
-
   depends_on = [aws_internet_gateway.igw]
 
   tags = {
