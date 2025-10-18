@@ -52,10 +52,9 @@ output "bastion_sg_id" {
 }
 
 # =========================================================
-# Admin IP Information
+# Admin IP Detection Output
 # =========================================================
-
 output "admin_ip" {
-  description = "The detected public IP address (in CIDR format) used for admin SSH access"
+  description = "The detected or manually overridden admin IP used in security groups"
   value       = local.admin_ip
 }
