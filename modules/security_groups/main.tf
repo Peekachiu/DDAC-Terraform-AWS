@@ -9,7 +9,7 @@
 # - Allows SSH only from admin IP (optional)
 ############################################################
 resource "aws_security_group" "web_sg" {
-  name        = "${var.vpc_name}-public-sg"
+  name        = "${var.vpc_name}-web-sg"
   description = "Allow HTTP, HTTPS, and restricted SSH"
   vpc_id      = var.vpc_id
 
