@@ -38,7 +38,7 @@ resource "aws_instance" "bastion" {
               #!/bin/bash
               apt-get update -y
               apt-get upgrade -y
-              apt-get install -y unzip curl git
+              apt-get install -y unzip curl git awscli openssh-server
 
               # Optional: install AWS CLI
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -69,7 +69,7 @@ resource "aws_eip" "bastion_eip" {
   count    = var.assign_eip ? 1 : 0
   instance = aws_instance.bastion.id
   domain   = "vpc"
-  
+
   tags = {
     Name = "${var.vpc_name}-bastion-eip"
   }
