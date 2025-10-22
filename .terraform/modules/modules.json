@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"bastion","Source":"./modules/bastion","Dir":"modules/bastion"},{"Key":"security_groups","Source":"./modules/security_groups","Dir":"modules/security_groups"},{"Key":"vpc","Source":"./modules/vpc","Dir":"modules/vpc"}]}
