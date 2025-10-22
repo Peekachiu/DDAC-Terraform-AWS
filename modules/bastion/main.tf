@@ -1,8 +1,9 @@
 ###############################################
-# Fetch Latest Ubuntu 22.04 LTS AMI (ap-southeast-1)
+# Fetch Latest Ubuntu 22.04 LTS AMI
 ###############################################
 data "aws_ami" "ubuntu" {
   most_recent = true
+  owners      = ["099720109477"] # Canonical
 
   filter {
     name   = "name"
@@ -13,65 +14,59 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-
-  owners = ["099720109477"] # Canonical (official Ubuntu)
 }
 
 ###############################################
-# Bastion Host Module - EC2 Instance in Public Subnet
+# Multi-AZ Bastion Host Deployment
 ###############################################
 
+# If multi-AZ is enabled, one bastion per public subnet.
+# Otherwise, just deploy one bastion in the first subnet.
+locals {
+  target_subnets = var.enable_multi_az ? var.public_subnet_ids : [var.public_subnet_ids[0]]
+}
+
 resource "aws_instance" "bastion" {
-  ami           = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  subnet_id     = var.public_subnet_id
-  key_name      = var.key_name
-
+  count                  = length(local.target_subnets)
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.instance_type
+  subnet_id              = local.target_subnets[count.index]
+  key_name               = var.key_name
   vpc_security_group_ids = [var.bastion_sg_id]
-
   associate_public_ip_address = true
 
-  # ------------------------------------------
-  # User Data Script (runs on instance startup)
-  # ------------------------------------------
   user_data = <<-EOF
               #!/bin/bash
               apt-get update -y
               apt-get upgrade -y
               apt-get install -y unzip curl git awscli openssh-server
-
-              # Optional: install AWS CLI
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
               sudo ./aws/install
-
-              # Ensure SSH service is active
               systemctl enable ssh
               systemctl start ssh
-
-              # Add banner for clarity
               echo "Welcome to DDAC Bastion Host (Ubuntu)" > /etc/motd
               EOF
 
-  # ✅ Root volume configuration
   root_block_device {
     volume_size = var.root_volume_size
     volume_type = "gp3"
-  }  
+  }
 
   tags = {
-    Name = "${var.vpc_name}-bastion-host"
+    Name = "${var.vpc_name}-bastion-${count.index + 1}"
   }
 }
 
-# Elastic IP for Bastion Host
+###############################################
+# Elastic IP per Bastion Host
+###############################################
 resource "aws_eip" "bastion_eip" {
-  count    = var.assign_eip ? 1 : 0
-  instance = aws_instance.bastion.id
+  count    = length(aws_instance.bastion)
+  instance = aws_instance.bastion[count.index].id
   domain   = "vpc"
 
   tags = {
-    Name = "${var.vpc_name}-bastion-eip"
+    Name = "${var.vpc_name}-bastion-eip-${count.index + 1}"
   }
 }
-

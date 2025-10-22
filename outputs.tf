@@ -77,3 +77,8 @@ output "bastion_instance_id" {
   value       = module.bastion.bastion_instance_id
 }
 
+output "bastion_public_ips" {
+  description = "List of public IPs for all bastion hosts"
+  value       = aws_eip.bastion_eip[*].public_ip
+}
+

@@ -40,3 +40,15 @@ variable "assign_eip" {
   default     = true
 }
 
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs for multi-AZ bastion deployment"
+  type        = list(string)
+}
+
+variable "enable_multi_az" {
+  description = "Whether to deploy bastion hosts in multiple AZs"
+  type        = bool
+  default     = false
+}
+
+
