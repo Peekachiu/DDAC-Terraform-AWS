@@ -2,16 +2,19 @@
 # SECURITY GROUP CONFIGURATION MODULE
 # =====================================
 
-# -------------------------------
-# 1. Public Security Group
-# -------------------------------
+############################################################
+# 1. Public Web Security Group
+# ----------------------------------------------------------
+# - Allows HTTP/HTTPS from internet
+# - Allows SSH only from admin IP (optional)
+############################################################
 resource "aws_security_group" "public_sg" {
   name        = "${var.vpc_name}-public-sg"
-  description = "Allow HTTP, HTTPS, and SSH from internet"
+  description = "Allow HTTP, HTTPS, and restricted SSH"
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "Allow HTTP"
+    description = "Allow HTTP traffic from anywhere"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -19,7 +22,7 @@ resource "aws_security_group" "public_sg" {
   }
 
   ingress {
-    description = "Allow HTTPS"
+    description = "Allow HTTPS traffic from anywhere"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -32,7 +35,7 @@ resource "aws_security_group" "public_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [var.admin_ip]
-}
+  }
 
   egress {
     from_port   = 0
@@ -46,18 +49,21 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-# -------------------------------
-# 2. Private Security Group
-# -------------------------------
-resource "aws_security_group" "private_sg" {
-  name        = "${var.vpc_name}-private-sg"
-  description = "Allow inbound from public SG and outbound to anywhere"
+############################################################
+# 2. API (Private) Security Group
+# ----------------------------------------------------------
+# - Allows traffic from web servers only (port 5000 by default)
+# - Denies all other inbound traffic
+############################################################
+resource "aws_security_group" "api_sg" {
+  name        = "${var.vpc_name}-api-sg"
+  description = "Allow API access from web servers only"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allow inbound from public SG"
-    from_port       = 0
-    to_port         = 65535
+    description     = "Allow API traffic from Web SG"
+    from_port       = var.api_port
+    to_port         = var.api_port
     protocol        = "tcp"
     security_groups = [aws_security_group.public_sg.id]
   }
@@ -70,24 +76,26 @@ resource "aws_security_group" "private_sg" {
   }
 
   tags = {
-    Name = "${var.vpc_name}-private-sg"
+    Name = "${var.vpc_name}-api-sg"
   }
 }
 
-# -------------------------------
+############################################################
 # 3. Database Security Group
-# -------------------------------
+# ----------------------------------------------------------
+# - Allows database access from API SG only (port 3306 default)
+############################################################
 resource "aws_security_group" "db_sg" {
   name        = "${var.vpc_name}-db-sg"
-  description = "Allow DB access from private SG only"
+  description = "Allow DB access from API SG only"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allow MySQL/Aurora from private SG"
-    from_port       = 3306
-    to_port         = 3306
+    description     = "Allow database connection from API SG"
+    from_port       = var.db_port
+    to_port         = var.db_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.private_sg.id]
+    security_groups = [aws_security_group.api_sg.id]
   }
 
   egress {
@@ -102,9 +110,12 @@ resource "aws_security_group" "db_sg" {
   }
 }
 
-# -------------------------------
+############################################################
 # 4. Bastion Host Security Group
-# -------------------------------
+# ----------------------------------------------------------
+# - Allows SSH from admin IP
+# - Can reach all private instances (for maintenance)
+############################################################
 resource "aws_security_group" "bastion_sg" {
   name        = "${var.vpc_name}-bastion-sg"
   description = "Allow SSH from admin IP only"
@@ -116,10 +127,10 @@ resource "aws_security_group" "bastion_sg" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [var.admin_ip]
-}
-
+  }
 
   egress {
+    description = "Allow all outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

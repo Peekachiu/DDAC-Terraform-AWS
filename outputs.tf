@@ -36,9 +36,9 @@ output "public_sg_id" {
   value       = module.security_groups.public_sg_id
 }
 
-output "private_sg_id" {
-  description = "ID of the private security group"
-  value       = module.security_groups.private_sg_id
+output "api_sg_id" {
+  description = "ID of the API security group"
+  value       = module.security_groups.api_sg_id
 }
 
 output "db_sg_id" {
