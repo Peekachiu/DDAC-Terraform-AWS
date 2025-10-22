@@ -54,6 +54,7 @@ output "bastion_sg_id" {
 # =========================================================
 # Admin IP Detection Output
 # =========================================================
+
 output "admin_ip" {
   description = "The detected or manually overridden admin IP used in security groups"
   value       = local.admin_ip
@@ -62,23 +63,18 @@ output "admin_ip" {
 # =========================================================
 # Bastion Host Outputs
 # =========================================================
-output "bastion_public_ip" {
-  description = "Public IP of the bastion host"
-  value       = module.bastion.bastion_public_ip
-}
 
-output "bastion_public_dns" {
-  description = "Public DNS of the bastion host"
-  value       = module.bastion.bastion_public_dns
-}
-
-output "bastion_instance_id" {
-  description = "Instance ID of the bastion host"
-  value       = module.bastion.bastion_instance_id
+output "bastion_instance_ids" {
+  description = "IDs of bastion EC2 instances"
+  value       = module.bastion.bastion_instance_ids
 }
 
 output "bastion_public_ips" {
-  description = "List of public IPs for all bastion hosts"
-  value       = aws_eip.bastion_eip[*].public_ip
+  description = "Public IPs of bastion hosts (if EIP assigned)"
+  value       = module.bastion.bastion_public_ips
 }
 
+output "bastion_public_dns" {
+  description = "Public DNS names of bastion hosts"
+  value       = module.bastion.bastion_public_dns
+}

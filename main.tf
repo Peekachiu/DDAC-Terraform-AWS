@@ -78,13 +78,14 @@ module "security_groups" {
 # Bastion Host Module
 ############################################################
 module "bastion" {
-  source = "./modules/bastion"
-
-  vpc_name         = var.vpc_name
-  public_subnet_id = element(module.vpc.public_subnet_ids, 0)
-  bastion_sg_id    = module.security_groups.bastion_sg_id
-
-  instance_type = "t3.micro"
-  key_name      = "ddac-bastion-key"
+  source            = "./modules/bastion"
+  vpc_name          = var.vpc_name
+  instance_type     = "t3.micro"
+  key_name          = "ddac-bastion-key"
+  bastion_sg_id     = module.security_groups.bastion_sg_id
+  public_subnet_ids = module.vpc.public_subnet_ids
+  enable_multi_az   = true
+  root_volume_size  = 8
 }
+
 

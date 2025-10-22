@@ -7,9 +7,18 @@ variable "vpc_name" {
   type        = string
 }
 
+# Preferred: list of public subnets for multi-AZ
+variable "public_subnet_ids" {
+  description = "List of public subnet IDs for multi-AZ bastion deployment"
+  type        = list(string)
+  default     = []
+}
+
+# Legacy fallback for single subnet mode (optional)
 variable "public_subnet_id" {
-  description = "ID of the public subnet where the bastion will reside"
+  description = "Single public subnet ID (used if multi-AZ disabled)"
   type        = string
+  default     = ""
 }
 
 variable "bastion_sg_id" {
@@ -26,23 +35,19 @@ variable "instance_type" {
 variable "key_name" {
   description = "SSH key pair name for accessing the bastion host"
   type        = string
+  default     = ""
 }
 
 variable "root_volume_size" {
-  description = "Root volume size (GB) for the Bastion host"
+  description = "Root EBS volume size (GB)"
   type        = number
   default     = 8
 }
 
 variable "assign_eip" {
-  description = "Whether to assign an Elastic IP to the bastion host"
+  description = "Whether to assign an Elastic IP to the bastion instance(s)"
   type        = bool
   default     = true
-}
-
-variable "public_subnet_ids" {
-  description = "List of public subnet IDs for multi-AZ bastion deployment"
-  type        = list(string)
 }
 
 variable "enable_multi_az" {
@@ -50,5 +55,3 @@ variable "enable_multi_az" {
   type        = bool
   default     = false
 }
-
-

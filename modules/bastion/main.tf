@@ -20,10 +20,12 @@ data "aws_ami" "ubuntu" {
 # Multi-AZ Bastion Host Deployment
 ###############################################
 
-# If multi-AZ is enabled, one bastion per public subnet.
-# Otherwise, just deploy one bastion in the first subnet.
+# Determine target subnets robustly:
+# - If multi-AZ enabled, use public_subnet_ids (must be non-empty)
+# - Else if public_subnet_ids provided and not empty, use first of them
+# - Else if public_subnet_id was provided (old style), use that
 locals {
-  target_subnets = var.enable_multi_az ? var.public_subnet_ids : [var.public_subnet_ids[0]]
+  target_subnets = var.enable_multi_az ? var.public_subnet_ids : length(var.public_subnet_ids) > 0 ? [var.public_subnet_ids[0]] : (var.public_subnet_id != "" ? [var.public_subnet_id] : [])
 }
 
 resource "aws_instance" "bastion" {
