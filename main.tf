@@ -73,3 +73,18 @@ module "security_groups" {
   vpc_name = var.vpc_name
   admin_ip = local.admin_ip
 }
+
+############################################################
+# Bastion Host Module
+############################################################
+module "bastion" {
+  source = "./modules/bastion"
+
+  vpc_name         = var.vpc_name
+  public_subnet_id = element(module.vpc.public_subnet_ids, 0)
+  bastion_sg_id    = module.security_groups.bastion_sg_id
+
+  instance_type = "t3.micro"
+  key_name      = "ddac-bastion-key"
+}
+

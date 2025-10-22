@@ -31,3 +31,15 @@ variable "admin_ip_override" {
   type        = string
   default     = ""
 }
+
+variable "project_name" {
+  description = "Project name tag for all resources"
+  type        = string
+  default     = "DDAC"
+}
+
+variable "key_name" {
+  description = "AWS key pair name to use for SSH access"
+  type        = string
+  default     = "ddac-bastion-key"
+}
