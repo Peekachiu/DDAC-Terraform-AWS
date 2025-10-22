@@ -3,22 +3,6 @@
 # =====================================
 
 # -------------------------------
-# 1. Public Security Group
-# -------------------------------
-output "public_sg_id" {
-  description = "ID of the public security group"
-  value       = aws_security_group.public_sg.id
-}
-
-# -------------------------------
-# 2. Private Security Group
-# -------------------------------
-output "private_sg_id" {
-  description = "ID of the private security group"
-  value       = aws_security_group.private_sg.id
-}
-
-# -------------------------------
 # 3. Database Security Group
 # -------------------------------
 output "db_sg_id" {

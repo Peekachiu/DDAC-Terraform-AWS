@@ -8,7 +8,7 @@
 # - Allows HTTP/HTTPS from internet
 # - Allows SSH only from admin IP (optional)
 ############################################################
-resource "aws_security_group" "public_sg" {
+resource "aws_security_group" "web_sg" {
   name        = "${var.vpc_name}-public-sg"
   description = "Allow HTTP, HTTPS, and restricted SSH"
   vpc_id      = var.vpc_id
@@ -29,13 +29,17 @@ resource "aws_security_group" "public_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  ingress {
-    description = "SSH access from admin IP"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.admin_ip]
+  dynamic "ingress" {
+    for_each = var.enable_web_ssh ? [1] : []
+    content {
+      description = "SSH access from admin IP"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [var.admin_ip]
+    }
   }
+
 
   egress {
     from_port   = 0
@@ -45,7 +49,7 @@ resource "aws_security_group" "public_sg" {
   }
 
   tags = {
-    Name = "${var.vpc_name}-public-sg"
+    Name = "${var.vpc_name}-web-sg"
   }
 }
 
@@ -65,7 +69,15 @@ resource "aws_security_group" "api_sg" {
     from_port       = var.api_port
     to_port         = var.api_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.public_sg.id]
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  ingress {
+  description     = "Allow SSH from Bastion Host"
+  from_port       = 22
+  to_port         = 22
+  protocol        = "tcp"
+  security_groups = [aws_security_group.bastion_sg.id]
   }
 
   egress {
@@ -97,6 +109,14 @@ resource "aws_security_group" "db_sg" {
     protocol        = "tcp"
     security_groups = [aws_security_group.api_sg.id]
   }
+
+  ingress {
+    description     = "Allow SSH from Bastion Host"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
+    security_groups = [aws_security_group.bastion_sg.id]
+}
 
   egress {
     from_port   = 0

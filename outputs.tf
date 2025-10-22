@@ -31,9 +31,9 @@ output "nat_eip_addresses" {
 # Root Outputs — From the Security Groups Module
 # =========================================================
 
-output "public_sg_id" {
+output "web_sg_id" {
   description = "ID of the public security group"
-  value       = module.security_groups.public_sg_id
+  value       = module.security_groups.web_sg_id
 }
 
 output "api_sg_id" {

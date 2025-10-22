@@ -23,6 +23,12 @@ variable "admin_ip" {
   type        = string
 }
 
+variable "enable_web_ssh" {
+  description = "Whether to allow SSH access to web servers from admin IP"
+  type        = bool
+  default     = true
+}
+
 # -------------------------------
 # Optional Parameters (Future-proofing)
 # -------------------------------
