@@ -78,3 +78,21 @@ output "bastion_public_dns" {
   description = "Public DNS names of bastion hosts"
   value       = module.bastion.bastion_public_dns
 }
+
+# =========================================================
+# Web Server Outputs
+# =========================================================
+output "web_instance_ids" {
+  description = "Instance IDs of web servers"
+  value       = module.web_server.web_instance_ids
+}
+
+output "web_public_ips" {
+  description = "Public IPs of web servers"
+  value       = module.web_server.web_public_ips
+}
+
+output "web_public_dns" {
+  description = "Public DNS names of web servers"
+  value       = module.web_server.web_public_dns
+}

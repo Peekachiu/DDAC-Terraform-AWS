@@ -88,4 +88,17 @@ module "bastion" {
   root_volume_size  = 8
 }
 
-
+############################################################
+# Web Server Module (Public Subnets, Multi-AZ)
+############################################################
+module "web_server" {
+  source            = "./modules/web_server"
+  vpc_name          = var.vpc_name
+  project_name      = var.project_name
+  public_subnet_ids = module.vpc.public_subnet_ids
+  web_sg_id         = module.security_groups.web_sg_id
+  key_name          = var.key_name
+  instance_type     = "t3.micro"
+  root_volume_size  = 8
+  assign_eip        = true
+}
