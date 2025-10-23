@@ -85,6 +85,7 @@ module "bastion" {
   bastion_sg_id     = module.security_groups.bastion_sg_id
   public_subnet_ids = module.vpc.public_subnet_ids
   enable_multi_az   = true
+  assign_eip = false
   root_volume_size  = 8
 }
 

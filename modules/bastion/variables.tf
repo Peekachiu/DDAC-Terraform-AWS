@@ -47,7 +47,7 @@ variable "root_volume_size" {
 variable "assign_eip" {
   description = "Whether to assign an Elastic IP to the bastion instance(s)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_multi_az" {
