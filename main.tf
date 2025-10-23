@@ -118,3 +118,16 @@ module "alb" {
 
   enable_https      = false    # 🔒 set to true later when you add ACM certificate
 }
+
+############################################################
+# Private API Module
+############################################################
+module "api" {
+  source             = "./modules/api"
+  vpc_name           = var.vpc_name
+  private_subnet_ids = module.vpc.private_subnet_ids
+  api_sg_id          = module.security_groups.api_sg_id
+  key_name           = var.key_name
+  instance_type      = "t3.micro"
+  root_volume_size   = 8
+}
