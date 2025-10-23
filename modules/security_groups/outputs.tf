@@ -33,3 +33,11 @@ output "api_sg_id" {
   description = "ID of the API server security group"
   value       = aws_security_group.api_sg.id
 }
+
+# -------------------------------
+# Load Balancer Security Group
+# -------------------------------
+output "lb_sg_id" {
+  description = "ID of the Load Balancer security group"
+  value       = aws_security_group.lb_sg.id
+}

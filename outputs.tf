@@ -51,6 +51,11 @@ output "bastion_sg_id" {
   value       = module.security_groups.bastion_sg_id
 }
 
+output "lb_sg_id" {
+  description = "Security group ID for the load balancer"
+  value       = module.security_groups.lb_sg_id
+}
+
 # =========================================================
 # Admin IP Detection Output
 # =========================================================
@@ -95,4 +100,12 @@ output "web_public_ips" {
 output "web_public_dns" {
   description = "Public DNS names of web servers"
   value       = module.web_server.web_public_dns
+}
+
+# =========================================================
+# Application Load Balancer Outputs
+# =========================================================
+output "alb_dns_name" {
+  description = "Public DNS name of the Application Load Balancer"
+  value       = module.alb.alb_dns_name
 }

@@ -102,3 +102,18 @@ module "web_server" {
   root_volume_size  = 8
   assign_eip        = true
 }
+
+############################################################
+# Application Load Balancer Module
+############################################################
+module "alb" {
+  source            = "./modules/alb"
+  project_name      = var.project_name
+  vpc_name          = var.vpc_name
+  vpc_id            = module.vpc.vpc_id
+  lb_sg_id          = module.security_groups.lb_sg_id
+  public_subnet_ids = module.vpc.public_subnet_ids
+  web_instance_ids  = module.web_server.web_instance_ids
+
+  enable_https      = false    # 🔒 set to true later when you add ACM certificate
+}
