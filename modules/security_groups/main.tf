@@ -161,3 +161,54 @@ resource "aws_security_group" "bastion_sg" {
     Name = "${var.vpc_name}-bastion-sg"
   }
 }
+
+############################################################
+# 0. Load Balancer Security Group
+# ----------------------------------------------------------
+# - Allows HTTP/HTTPS from anywhere
+# - Allows outbound to web servers only
+############################################################
+resource "aws_security_group" "lb_sg" {
+  name        = "${var.vpc_name}-lb-sg"
+  description = "Security group for Load Balancer - allows public HTTP/HTTPS"
+  vpc_id      = var.vpc_id
+
+  # Allow HTTP from anywhere
+  ingress {
+    description = "Allow HTTP from anywhere"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow HTTPS from anywhere
+  ingress {
+    description = "Allow HTTPS from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Outbound only to web servers (HTTP)
+  egress {
+    description     = "Allow traffic to Web Servers"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  # Optional: Allow health checks and internal ALB traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-lb-sg"
+  }
+}
