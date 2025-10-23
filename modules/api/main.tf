@@ -1,0 +1,83 @@
+###############################################
+# Private API Layer - Multi-AZ EC2 Instances
+# Node.js + Express Setup
+###############################################
+
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical (official Ubuntu)
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+###############################################
+# Deploy EC2 instances across multiple AZs
+###############################################
+resource "aws_instance" "api" {
+  count                       = length(var.private_subnet_ids)
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = var.instance_type
+  subnet_id                   = var.private_subnet_ids[count.index]
+  vpc_security_group_ids      = [var.api_sg_id]
+  associate_public_ip_address = false
+  key_name                    = var.key_name
+
+  # ------------------------------------------
+  # User Data - Setup Node.js API Server
+  # ------------------------------------------
+  user_data = <<-EOF
+              #!/bin/bash
+              apt-get update -y
+              apt-get upgrade -y
+              apt-get install -y curl git
+
+              # Install Node.js (LTS)
+              curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+              apt-get install -y nodejs
+
+              # Create a simple Express API
+              mkdir -p /home/ubuntu/api
+              cd /home/ubuntu/api
+
+              cat <<'APP' > index.js
+              const express = require('express');
+              const app = express();
+              const PORT = 5000;
+
+              app.get('/', (req, res) => {
+                  res.send('Hello from Private Node.js API (AZ-${count.index + 1})!');
+              });
+
+              app.listen(PORT, '0.0.0.0', () => {
+                  console.log(\`API server running on port \${PORT}\`);
+              });
+              APP
+
+              # Initialize and run app
+              npm init -y
+              npm install express
+
+              # Run API in background
+              nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
+
+              # Banner message
+              echo "Node.js API server deployed successfully!" > /etc/motd
+              EOF
+
+  root_block_device {
+    volume_size = var.root_volume_size
+    volume_type = "gp3"
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-api-${count.index + 1}"
+  }
+}
