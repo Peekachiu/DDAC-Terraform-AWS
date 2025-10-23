@@ -64,7 +64,7 @@ resource "aws_instance" "bastion" {
 # Elastic IP per Bastion Host
 ###############################################
 resource "aws_eip" "bastion_eip" {
-  count    = length(aws_instance.bastion)
+  count    = var.assign_eip ? length(aws_instance.bastion) : 0
   instance = aws_instance.bastion[count.index].id
   domain   = "vpc"
 
