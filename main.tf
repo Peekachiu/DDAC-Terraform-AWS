@@ -132,8 +132,8 @@ module "api" {
 
   # ✅ Use sorted subnet list for deterministic order
   private_subnet_ids = [
-    sort(module.vpc.private_subnet_ids)[0], # AZ-1a
-    sort(module.vpc.private_subnet_ids)[2]  # AZ-1b
+    sort(module.vpc.private_subnet_ids)[2], # AZ-1a
+    sort(module.vpc.private_subnet_ids)[0]  # AZ-1b
   ]
 
   root_volume_size = 8
