@@ -120,14 +120,37 @@ module "alb" {
 }
 
 ############################################################
-# Private API Module
+# API Layer Module (Node.js Express - Multi-AZ)
 ############################################################
+
+# Find private subnets by AZ for deterministic mapping
+data "aws_subnets" "private_1a" {
+  filter {
+    name   = "tag:Name"
+    values = ["private-subnet-1a"]
+  }
+}
+
+data "aws_subnets" "private_1b" {
+  filter {
+    name   = "tag:Name"
+    values = ["private-subnet-1b"]
+  }
+}
+
 module "api" {
-  source             = "./modules/api"
-  vpc_name           = var.vpc_name
-  private_subnet_ids = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[2]] # Distribute across AZs
-  api_sg_id          = module.security_groups.api_sg_id
-  key_name           = var.key_name
-  instance_type      = "t3.micro"
-  root_volume_size   = 8
+  source = "./modules/api"
+
+  vpc_name = var.vpc_name
+  instance_type = "t3.micro"
+  key_name = var.key_name
+  api_sg_id = module.security_groups.api_sg_id
+
+  # ✅ Assign explicitly by AZ
+  private_subnet_ids = [
+    data.aws_subnets.private_1a.ids[0],
+    data.aws_subnets.private_1b.ids[0]
+  ]
+
+  root_volume_size = 8
 }
