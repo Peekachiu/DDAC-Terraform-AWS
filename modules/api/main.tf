@@ -1,6 +1,6 @@
 ###############################################
 # Private API Layer - Multi-AZ EC2 Instances
-# Node.js + Express Setup (Fixed Version)
+# Node.js + Express Setup (Terraform-safe)
 ###############################################
 
 data "aws_ami" "ubuntu" {
@@ -27,45 +27,46 @@ resource "aws_instance" "api" {
   associate_public_ip_address = false
   key_name                    = var.key_name
 
-  # Literal heredoc to prevent Terraform interpolation
-  user_data = <<-'EOF'
-              #!/bin/bash
-              apt-get update -y
-              apt-get upgrade -y
-              apt-get install -y curl git
+  # ------------------------------------------
+  # User Data Script (literal heredoc to avoid parsing)
+  # ------------------------------------------
+  user_data = <<EOF
+#!/bin/bash
+apt-get update -y
+apt-get upgrade -y
+apt-get install -y curl git
 
-              # Install Node.js (LTS)
-              curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-              apt-get install -y nodejs
+# Install Node.js (LTS)
+curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+apt-get install -y nodejs
 
-              # Create simple Express API
-              mkdir -p /home/ubuntu/api
-              cd /home/ubuntu/api
+# Create a simple Express API
+mkdir -p /home/ubuntu/api
+cd /home/ubuntu/api
 
-              cat <<'APP' > index.js
-              const express = require('express');
-              const app = express();
-              const PORT = 5000;
+cat > index.js <<'APP'
+const express = require('express');
+const app = express();
+const PORT = 5000;
 
-              app.get('/', (req, res) => {
-                  res.send('Hello from Private Node.js API!');
-              });
+app.get('/', (req, res) => {
+    res.send('Hello from Private Node.js API!');
+});
 
-              app.listen(PORT, '0.0.0.0', () => {
-                  console.log(`API server running on port ${PORT}`);
-              });
-              APP
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`API server running on port ${PORT}`);
+});
+APP
 
-              # Initialize Node.js project
-              npm init -y
-              npm install express
+# Initialize and run the app
+npm init -y
+npm install express
 
-              # Run in background
-              nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
+# Run the app in the background
+nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
 
-              # Banner
-              echo "Node.js API server deployed successfully!" > /etc/motd
-              EOF
+echo "Node.js API server deployed successfully!" > /etc/motd
+EOF
 
   root_block_device {
     volume_size = var.root_volume_size
