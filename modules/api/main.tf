@@ -18,11 +18,15 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+locals {
+  target_private_subnets = length(var.private_subnet_ids) > 2 ? slice(var.private_subnet_ids, 0, 2) : var.private_subnet_ids
+}
+
 resource "aws_instance" "api" {
-  count                       = length(var.private_subnet_ids)
+  count                       = length(local.target_private_subnets)
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
-  subnet_id                   = var.private_subnet_ids[count.index]
+  subnet_id                   = local.target_private_subnets[count.index]
   vpc_security_group_ids      = [var.api_sg_id]
   associate_public_ip_address = false
   key_name                    = var.key_name

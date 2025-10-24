@@ -125,7 +125,7 @@ module "alb" {
 module "api" {
   source             = "./modules/api"
   vpc_name           = var.vpc_name
-  private_subnet_ids = module.vpc.private_subnet_ids
+  private_subnet_ids = [module.vpc.private_subnet_ids[0], module.vpc.private_subnet_ids[2]] # Distribute across AZs
   api_sg_id          = module.security_groups.api_sg_id
   key_name           = var.key_name
   instance_type      = "t3.micro"
