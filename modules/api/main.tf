@@ -30,43 +30,43 @@ resource "aws_instance" "api" {
   # ------------------------------------------
   # User Data Script (literal heredoc to avoid parsing)
   # ------------------------------------------
-  user_data = <<-EOF
-                #!/bin/bash
-                apt-get update -y
-                apt-get upgrade -y
-                apt-get install -y curl git
-
-                # Install Node.js (LTS)
-                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-                apt-get install -y nodejs
-
-                # Create a simple Express API
-                mkdir -p /home/ubuntu/api
-                cd /home/ubuntu/api
-
-                cat > index.js <<'APP'
-                const express = require('express');
-                const app = express();
-                const PORT = 5000;
-
-                app.get('/', (req, res) => {
-                    res.send('Hello from Private Node.js API!');
-                });
-
-                app.listen(PORT, '0.0.0.0', () => {
-                    console.log(`API server running on port ${PORT}`);
-                });
-                APP
-
-                # Initialize and run the app
-                npm init -y
-                npm install express
-
-                # Run the app in the background
-                nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
-
-                echo "Node.js API server deployed successfully!" > /etc/motd
-                EOF
+  user_data = <<EOF
+            #!/bin/bash
+            apt-get update -y
+            apt-get upgrade -y
+            apt-get install -y curl git
+            
+            # Install Node.js (LTS)
+            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+            apt-get install -y nodejs
+            
+            # Create a simple Express API
+            mkdir -p /home/ubuntu/api
+            cd /home/ubuntu/api
+            
+            cat > index.js <<'APP'
+            const express = require('express');
+            const app = express();
+            const PORT = 5000;
+            
+            app.get('/', (req, res) => {
+                res.send('Hello from Private Node.js API!');
+            });
+            
+            app.listen(PORT, '0.0.0.0', () => {
+                console.log('API server running on port ' + PORT);
+            });
+            APP
+            
+            # Initialize and run the app
+            npm init -y
+            npm install express
+            
+            # Run the app in the background
+            nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
+            
+            echo "Node.js API server deployed successfully!" > /etc/motd
+            EOF
 
   root_block_device {
     volume_size = var.root_volume_size
