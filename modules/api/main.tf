@@ -1,11 +1,11 @@
 ###############################################
 # Private API Layer - Multi-AZ EC2 Instances
-# Node.js + Express Setup
+# Node.js + Express Setup (Fixed Version)
 ###############################################
 
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"] # Canonical (official Ubuntu)
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
@@ -18,9 +18,6 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-###############################################
-# Deploy EC2 instances across multiple AZs
-###############################################
 resource "aws_instance" "api" {
   count                       = length(var.private_subnet_ids)
   ami                         = data.aws_ami.ubuntu.id
@@ -30,48 +27,45 @@ resource "aws_instance" "api" {
   associate_public_ip_address = false
   key_name                    = var.key_name
 
-  # ------------------------------------------
-  # User Data - Setup Node.js API Server
-  # ------------------------------------------
-  user_data = <<-EOF
-            #!/bin/bash
-            apt-get update -y
-            apt-get upgrade -y
-            apt-get install -y curl git
+  # Literal heredoc to prevent Terraform interpolation
+  user_data = <<-'EOF'
+              #!/bin/bash
+              apt-get update -y
+              apt-get upgrade -y
+              apt-get install -y curl git
 
-            # Install Node.js (LTS)
-            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get install -y nodejs
+              # Install Node.js (LTS)
+              curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+              apt-get install -y nodejs
 
-            # Create a simple Express API
-            mkdir -p /home/ubuntu/api
-            cd /home/ubuntu/api
+              # Create simple Express API
+              mkdir -p /home/ubuntu/api
+              cd /home/ubuntu/api
 
-            cat <<'APP' > index.js
-            const express = require('express');
-            const app = express();
-            const PORT = 5000;
+              cat <<'APP' > index.js
+              const express = require('express');
+              const app = express();
+              const PORT = 5000;
 
-            app.get('/', (req, res) => {
-                res.send('Hello from Private Node.js API!');
-            });
+              app.get('/', (req, res) => {
+                  res.send('Hello from Private Node.js API!');
+              });
 
-            app.listen(PORT, '0.0.0.0', () => {
-                console.log(\`API server running on port ${PORT}\`);
-            });
-            APP
+              app.listen(PORT, '0.0.0.0', () => {
+                  console.log(`API server running on port ${PORT}`);
+              });
+              APP
 
-            # Initialize and run app
-            npm init -y
-            npm install express
+              # Initialize Node.js project
+              npm init -y
+              npm install express
 
-            # Run API in background
-            nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
+              # Run in background
+              nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
 
-            # Banner message
-            echo "Node.js API server deployed successfully!" > /etc/motd
-            EOF
-
+              # Banner
+              echo "Node.js API server deployed successfully!" > /etc/motd
+              EOF
 
   root_block_device {
     volume_size = var.root_volume_size
