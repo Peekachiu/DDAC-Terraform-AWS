@@ -112,6 +112,9 @@ module "web_server" {
   # Pass the ALB target group ARN so the ASG registers instances
   alb_target_group_arn = module.alb.alb_target_group_arn
 
+  # Pass in the new INTERNAL ALB's DNS name
+  api_alb_dns_name   = module.internal_alb.alb_dns_name
+
   # Ensure the Auto Scaling service-linked role exists before ASG creation
   depends_on = [module.iam_web]
 }
@@ -126,9 +129,36 @@ module "alb" {
   vpc_name          = var.vpc_name
   vpc_id            = module.vpc.vpc_id
   lb_sg_id          = module.security_groups.lb_sg_id
-  public_subnet_ids = module.vpc.public_subnet_ids
+  subnet_ids        = module.vpc.public_subnet_ids
+  name_prefix       = "web"
+  is_internal       = false
+  target_port       = 80
 
   enable_https      = false    # 🔒 set to true later when you add ACM certificate
+}
+
+############################################################
+# Application Load Balancer Module (INTERNAL - API)
+############################################################
+module "internal_alb" {
+  source            = "./modules/alb"
+  project_name      = var.project_name
+  vpc_name          = var.vpc_name
+  vpc_id            = module.vpc.vpc_id
+  
+  # Use the new API LB security group you created
+  lb_sg_id          = module.security_groups.api_lb_sg_id 
+  
+  # Use private subnets
+  subnet_ids        = [
+    module.vpc.private_subnets_map["private-subnet-1a"],
+    module.vpc.private_subnets_map["private-subnet-1b"]
+  ]
+
+  # Use the new variables
+  name_prefix       = "api"
+  is_internal       = true
+  target_port       = 5000
 }
 
 ############################################################
@@ -146,6 +176,10 @@ module "api" {
     module.vpc.private_subnets_map["private-subnet-1a"],
     module.vpc.private_subnets_map["private-subnet-1b"],
   ]
+
+  alb_target_group_arn = module.internal_alb.alb_target_group_arn
+
+  depends_on = [ module.security_groups ]
 
   root_volume_size = 8
 }

@@ -69,7 +69,7 @@ resource "aws_security_group" "api_sg" {
     from_port       = var.api_port
     to_port         = var.api_port
     protocol        = "tcp"
-    security_groups = [aws_security_group.web_sg.id]
+    security_groups = [aws_security_group.api_lb_sg.id]
   }
 
   ingress {
@@ -163,7 +163,7 @@ resource "aws_security_group" "bastion_sg" {
 }
 
 ############################################################
-# 0. Load Balancer Security Group
+# 5. External Load Balancer Security Group
 # ----------------------------------------------------------
 # - Allows HTTP/HTTPS from anywhere
 # - Allows outbound to web servers only
@@ -210,5 +210,37 @@ resource "aws_security_group" "lb_sg" {
 
   tags = {
     Name = "${var.vpc_name}-lb-sg"
+  }
+}
+
+############################################################
+# 6. Internal API Load Balancer Security Group
+# ----------------------------------------------------------
+# - Allows traffic from Web SG (port 5000)
+# - Allows traffic to API SG (port 5000)
+############################################################
+resource "aws_security_group" "api_lb_sg" {
+  name        = "${var.vpc_name}-api-lb-sg"
+  description = "Allow traffic from Web SG to Internal API-ALB"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "Allow API traffic from Web SG"
+    from_port       = var.api_port # 5000
+    to_port         = var.api_port # 5000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_sg.id]
+  }
+
+  egress {
+    description     = "Allow traffic to API Servers"
+    from_port       = var.api_port # 5000
+    to_port         = var.api_port # 5000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.api_sg.id]
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-api-lb-sg"
   }
 }

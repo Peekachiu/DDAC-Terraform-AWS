@@ -4,16 +4,16 @@
 
 # Create the ALB
 resource "aws_lb" "app_lb" {
-  name               = "${var.vpc_name}-alb"
-  internal           = false
+  name               = "${var.vpc_name}-${var.name_prefix}-alb"
+  internal           = var.is_internal
   load_balancer_type = "application"
   security_groups    = [var.lb_sg_id]
-  subnets            = var.public_subnet_ids
+  subnets            = var.subnet_ids
 
   enable_deletion_protection = false
 
   tags = {
-    Name    = "${var.vpc_name}-alb"
+    Name    = "${var.vpc_name}-${var.name_prefix}-alb"
     Project = var.project_name
   }
 }
@@ -22,8 +22,8 @@ resource "aws_lb" "app_lb" {
 # Target Group for Web Servers
 ###############################################
 resource "aws_lb_target_group" "web_tg" {
-  name     = "${var.vpc_name}-tg"
-  port     = 80
+  name     = "${var.vpc_name}-${var.name_prefix}-tg"
+  port     = var.target_port
   protocol = "HTTP"
   vpc_id   = var.vpc_id
 
@@ -34,10 +34,11 @@ resource "aws_lb_target_group" "web_tg" {
     interval            = 30
     healthy_threshold   = 3
     unhealthy_threshold = 2
+    port                = var.target_port
   }
 
   tags = {
-    Name = "${var.vpc_name}-tg"
+    Name = "${var.vpc_name}-${var.name_prefix}-tg"
   }
 }
 
@@ -46,12 +47,12 @@ resource "aws_lb_target_group" "web_tg" {
 ###############################################
 resource "aws_lb_listener" "http_listener" {
   load_balancer_arn = aws_lb.app_lb.arn
-  port              = 80
+  port              = var.target_port
   protocol          = "HTTP"
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.web_tg.arn
+    target_group_arn = aws_lb_target_group.tg.arn
   }
 }
 
@@ -59,7 +60,7 @@ resource "aws_lb_listener" "http_listener" {
 # Optional Future HTTPS Listener (Port 443)
 ###############################################
 resource "aws_lb_listener" "https_listener" {
-  count             = var.enable_https ? 1 : 0
+  count             = var.enable_https && !var.is_internal ? 1 : 0
   load_balancer_arn = aws_lb.app_lb.arn
   port              = 443
   protocol          = "HTTPS"
@@ -69,6 +70,6 @@ resource "aws_lb_listener" "https_listener" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.web_tg.arn
+    target_group_arn = aws_lb_target_group.tg.arn
   }
 }

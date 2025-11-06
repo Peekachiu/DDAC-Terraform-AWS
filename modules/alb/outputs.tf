@@ -14,5 +14,5 @@ output "alb_arn" {
 
 output "alb_target_group_arn" {
   description = "ARN of the target group"
-  value       = aws_lb_target_group.web_tg.arn
+  value       = aws_lb_target_group.tg.arn // CHANGED
 }

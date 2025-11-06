@@ -41,3 +41,8 @@ output "lb_sg_id" {
   description = "ID of the Load Balancer security group"
   value       = aws_security_group.lb_sg.id
 }
+
+output "api_lb_sg_id" {
+  description = "ID of the Internal API Load Balancer security group"
+  value       = aws_security_group.api_lb_sg.id
+}
