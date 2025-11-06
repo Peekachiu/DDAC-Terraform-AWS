@@ -20,7 +20,8 @@ resource "aws_db_instance" "db_instance" {
   engine               = "sqlserver-se" # SQL Server Standard Edition
   engine_version       = "15.00.4345.5.v1" # SQL Server 2019
   instance_class       = "db.t3.small"    # Good for development/testing
-  
+  license_model        = "license-included" # AWS handles SQL Server licensing
+
   allocated_storage    = 20 # 20 GB of storage
   storage_type         = "gp3"
 
