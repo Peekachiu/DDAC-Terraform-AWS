@@ -234,10 +234,10 @@ resource "aws_security_group" "api_lb_sg" {
 
   egress {
     description     = "Allow traffic to API Servers"
-    from_port       = var.api_port # 5000
-    to_port         = var.api_port # 5000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.api_sg.id]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = [ "0.0.0.0/0" ]
   }
 
   tags = {
