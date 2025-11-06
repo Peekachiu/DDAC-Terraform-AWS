@@ -25,9 +25,9 @@ provider "aws" {
 module "vpc" {
   source = "./modules/vpc"
 
-  vpc_name   = "ddac-VPC-01"
-  cidr_block = "10.0.0.0/16"
-  azs        = ["ap-southeast-1a", "ap-southeast-1b"]
+  vpc_name   = var.vpc_name
+  cidr_block = var.vpc_cidr
+  azs        = var.availability_zones
 
   public_subnets = [
     { name = "public-subnet-1", cidr = "10.0.1.0/24", az = "ap-southeast-1a" },
@@ -132,7 +132,6 @@ module "api" {
   key_name = var.key_name
   api_sg_id = module.security_groups.api_sg_id
 
-  # ✅ Use sorted subnet list for deterministic order
   private_subnet_ids = [
     sort(module.vpc.private_subnet_ids)[2], # AZ-1a
     sort(module.vpc.private_subnet_ids)[0]  # AZ-1b
@@ -146,7 +145,8 @@ module "api" {
 ############################################################
 module "iam_web" {
   source                = "./modules/iam"
-  manage_role           = false
+  manage_role           = true
   role_name             = "DDAC-web-ec2-role"
   instance_profile_name = "DDAC-web-ec2-profile"
+  project               = var.project_name
 }
