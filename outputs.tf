@@ -97,11 +97,6 @@ output "web_asg_name" {
   value       = module.web_server.asg_name
 }
 
-output "web_instance_ids" {
-  description = "Instance IDs currently in the web ASG"
-  value       = module.web_server.web_instance_ids
-}
-
 # If you previously relied on per-instance EIPs (discouraged), this shows EIPs if assigned
 output "web_eip_addresses" {
   description = "EIP addresses assigned to web instances (if assign_eip true)"
