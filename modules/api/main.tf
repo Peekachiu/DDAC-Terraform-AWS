@@ -87,7 +87,7 @@ resource "aws_instance" "api" {
 ###############################################
 resource "aws_lb_target_group_attachment" "api_attach" {
   # Only create attachments if an ARN is provided
-  count = var.alb_target_group_arn != "" ? length(local.target_private_subnets) : 0
+  count = var.enable_alb_attachment ? length(local.target_private_subnets) : 0
 
   target_group_arn = var.alb_target_group_arn
   target_id        = aws_instance.api[count.index].id

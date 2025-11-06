@@ -179,6 +179,8 @@ module "api" {
 
   alb_target_group_arn = module.internal_alb.alb_target_group_arn
 
+  enable_alb_attachment = true
+
   depends_on = [ module.security_groups ]
 
   root_volume_size = 8

@@ -39,3 +39,9 @@ variable "alb_target_group_arn" {
   type        = string
   default     = ""
 }
+
+variable "enable_alb_attachment" {
+  description = "Set to true to attach these instances to an ALB"
+  type        = bool
+  default     = false
+}
