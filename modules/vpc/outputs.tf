@@ -34,6 +34,11 @@ output "private_subnet_arns" {
   value       = [for subnet in aws_subnet.private : subnet.arn]
 }
 
+output "private_subnets_map" {
+  description = "Map of private subnet IDs, keyed by their 'name' attribute "
+  value = { for name, subnet in aws_subnet.private : name => subnet.id }
+}
+
 # -------------------------------
 # Internet Gateway Output
 # -------------------------------

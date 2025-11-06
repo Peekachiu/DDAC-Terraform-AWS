@@ -76,7 +76,7 @@ resource "aws_launch_template" "web_lt" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge(local.common_tags, { Name = "${var.project_name}-web" })
+    tags          = merge(local.common_tags, { Name = "${var.vpc_name}-web" })
   }
 }
 
@@ -99,7 +99,7 @@ resource "aws_autoscaling_group" "web_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${var.project_name}-web"
+    value               = "${var.vpc_name}-web"
     propagate_at_launch = true
   }
 
