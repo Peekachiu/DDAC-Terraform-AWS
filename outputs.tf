@@ -105,3 +105,16 @@ output "alb_dns_name" {
   description = "Public DNS name of the Application Load Balancer"
   value       = module.alb.alb_dns_name
 }
+
+# =========================================================
+# Database Outputs
+# =========================================================
+output "database_endpoint" {
+  description = "The connection endpoint for the RDS database"
+  value       = module.database.db_endpoint
+}
+
+output "database_port" {
+  description = "The connection port for the RDS database"
+  value       = module.database.db_port
+}

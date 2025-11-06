@@ -198,3 +198,27 @@ module "iam_web" {
   instance_profile_name = "DDAC-web-ec2-profile"
   project               = var.project_name
 }
+
+############################################################
+# Database Layer Module (RDS - MSSQL)
+############################################################
+module "database" {
+  source = "./modules/database"
+
+  project_name = var.project_name
+  vpc_name     = var.vpc_name
+
+  # Pass in the private subnets from the VPC module
+  private_subnet_ids = module.vpc.private_subnet_ids
+
+  # Pass in the DB security group ID
+  db_sg_id = module.security_groups.db_sg_id
+
+  # Pass in the new credentials
+  db_name     = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+
+  # Ensure the security group exists before creating the DB
+  depends_on = [module.security_groups]
+}

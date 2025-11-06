@@ -43,3 +43,26 @@ variable "key_name" {
   type        = string
   default     = "ddac-bastion-key"
 }
+
+# =========================================================
+# Database Variables
+# =========================================================
+
+variable "db_name" {
+  description = "The name of the database to create (e.g., DDAC)"
+  type        = string
+  default     = "DDAC_DB"
+}
+
+variable "db_username" {
+  description = "Master username for the RDS database"
+  type        = string
+  default     = "ddacadmin"
+}
+
+variable "db_password" {
+  description = "Master password for the RDS database (must meet complexity requirements)"
+  type        = string
+  default     = "Password1234!" # Please change this to a secure password
+  sensitive   = true
+}
