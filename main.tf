@@ -105,6 +105,9 @@ module "web_server" {
 
   # Pass the ALB target group ARN so the ASG registers instances
   alb_target_group_arn = module.alb.alb_target_group_arn
+
+  # Ensure the Auto Scaling service-linked role exists before ASG creation
+  depends_on = [module.iam_web]
 }
 
 ############################################################
