@@ -21,7 +21,7 @@ resource "aws_lb" "app_lb" {
 ###############################################
 # Target Group for Web Servers
 ###############################################
-resource "aws_lb_target_group" "web_tg" {
+resource "aws_lb_target_group" "tg" {
   name     = "${var.vpc_name}-${var.name_prefix}-tg"
   port     = var.target_port
   protocol = "HTTP"
