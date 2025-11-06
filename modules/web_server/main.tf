@@ -2,7 +2,7 @@
 # Web Server Module — Launch Template + Auto Scaling Group
 # - SSM instance profile for Session Manager
 # - Optional ALB target group integration
-# - Optional EIP assignment (not recommended)
+# Note: Avoid creating EIPs per instance for ASG-managed fleets
 ###########################################################
 
 # Fallback AMI (Canonical Ubuntu 22.04) if no ami_id provided
@@ -130,16 +130,6 @@ resource "aws_autoscaling_group" "web_asg" {
   }
 }
 
-# Optional: EIPs for ASG instances (discouraged for autoscaling fleets)
-resource "aws_eip" "web_eip" {
-  count = var.assign_eip ? length(aws_autoscaling_group.web_asg.instances) : 0
-
-  instance = aws_autoscaling_group.web_asg.instances[count.index].instance_id
-  domain   = "vpc"
-
-  tags = local.common_tags
-}
-
-
-# (Optional) If you need instance-level provisioning beyond user_data,
-# consider integrating SSM Run Command / Fleet Manager or a configuration management tool.
+# NOTE: Removed aws_eip resource and any data/aws_instances usage to avoid runtime/provider mismatches.
+# If you need instance-level IPs or IDs, query them outside this module (e.g., with aws CLI, a separate data source,
+# or add a dedicated data resource in a wrapper module after the ASG is created).
