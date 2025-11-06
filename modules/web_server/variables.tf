@@ -79,3 +79,9 @@ variable "associate_public_ip" {
 variable "iam_instance_profile_name" {
   type = string
 }
+
+variable "api_alb_dns_name" {
+  description = "Internal DNS name for the API load balancer"
+  type        = string
+  default     = ""
+}

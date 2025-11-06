@@ -113,7 +113,7 @@ module "web_server" {
   alb_target_group_arn = module.alb.alb_target_group_arn
 
   # Pass in the new INTERNAL ALB's DNS name
-  api_alb_dns_name   = module.internal_alb.alb_dns_name
+  api_alb_dns_name     = module.internal_alb.alb_dns_name
 
   # Ensure the Auto Scaling service-linked role exists before ASG creation
   depends_on = [module.iam_web]
