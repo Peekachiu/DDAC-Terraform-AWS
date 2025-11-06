@@ -1,8 +1,8 @@
 ###########################################################
 # Web Server Module — Launch Template + Auto Scaling Group
-# - SSM instance profile for Session Manager
+# - Assumes IAM instance profile is managed outside this module
 # - Optional ALB target group integration
-# Note: Avoid creating EIPs per instance for ASG-managed fleets
+# - Uses SSM-friendly instance profile rather than SSH keys by default
 ###########################################################
 
 # Fallback AMI (Canonical Ubuntu 22.04) if no ami_id provided
@@ -38,42 +38,21 @@ locals {
   EOF
 }
 
-# IAM role & instance profile for SSM (recommended instead of SSH-only)
-data "aws_iam_policy_document" "ec2_assume_role" {
-  statement {
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
+###########################################################
+# NOTE: IAM resources removed from this module.
+# Provide the instance profile name via variable:
+#   iam_instance_profile_name = module.iam_web.instance_profile_name
+# or pass an existing instance profile name directly.
+###########################################################
 
-resource "aws_iam_role" "ec2_role" {
-  name               = "${var.project_name}-web-ec2-role"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
-  tags               = local.common_tags
-}
-
-resource "aws_iam_role_policy_attachment" "ssm_attach" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-}
-
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "${var.project_name}-web-instance-profile"
-  role = aws_iam_role.ec2_role.name
-  tags = local.common_tags
-}
-
-# Launch Template with user_data and instance profile
 resource "aws_launch_template" "web_lt" {
   name_prefix   = "${var.project_name}-web-lt-"
   image_id      = local.ami_resolved
   instance_type = var.instance_type
 
+  # Use externally-managed instance profile (required)
   iam_instance_profile {
-    name = aws_iam_instance_profile.ec2_profile.name
+    name = var.iam_instance_profile_name
   }
 
   # key_name is optional; ASG + SSM allows you to omit SSH key
@@ -81,7 +60,7 @@ resource "aws_launch_template" "web_lt" {
 
   network_interfaces {
     security_groups             = [var.web_sg_id]
-    associate_public_ip_address = true
+    associate_public_ip_address = var.associate_public_ip != null ? var.associate_public_ip : true
   }
 
   user_data = base64encode(local.userdata_script)
@@ -101,7 +80,6 @@ resource "aws_launch_template" "web_lt" {
   }
 }
 
-# Auto Scaling Group
 resource "aws_autoscaling_group" "web_asg" {
   name                = "${var.project_name}-web-asg"
   desired_capacity    = var.asg_desired_capacity
@@ -115,7 +93,7 @@ resource "aws_autoscaling_group" "web_asg" {
   }
 
   health_check_type         = var.alb_target_group_arn != "" ? "ELB" : "EC2"
-  health_check_grace_period = 300
+  health_check_grace_period = var.health_check_grace_period
 
   target_group_arns = var.alb_target_group_arn != "" ? [var.alb_target_group_arn] : null
 
@@ -131,5 +109,5 @@ resource "aws_autoscaling_group" "web_asg" {
 }
 
 # NOTE: Removed aws_eip resource and any data/aws_instances usage to avoid runtime/provider mismatches.
-# If you need instance-level IPs or IDs, query them outside this module (e.g., with aws CLI, a separate data source,
-# or add a dedicated data resource in a wrapper module after the ASG is created).
+# If you need instance-level IPs or IDs, query them outside this module (e.g., with a separate data resource
+# after the ASG is created, or in a wrapper module that inspects instances).

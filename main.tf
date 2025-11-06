@@ -101,12 +101,10 @@ module "web_server" {
   key_name          = var.key_name
   instance_type     = "t3.micro"
   root_volume_size  = 8
+  iam_instance_profile_name = module.iam_web.instance_profile_name
 
   # Pass the ALB target group ARN so the ASG registers instances
   alb_target_group_arn = module.alb.alb_target_group_arn
-
-  # Disable per-instance EIPs for ASG-managed fleet
-  assign_eip        = false
 }
 
 ############################################################
@@ -141,4 +139,13 @@ module "api" {
   ]
 
   root_volume_size = 8
+}
+
+############################################################
+# IAM Module
+############################################################
+module "iam_web" {
+  source                = "./modules/iam"
+  role_name             = "DDAC-web-ec2-role"
+  instance_profile_name = "DDAC-web-ec2-profile"
 }
