@@ -33,3 +33,9 @@ variable "root_volume_size" {
   type        = number
   default     = 8
 }
+
+variable "alb_target_group_arn" {
+  description = "ARN of the ALB Target Group to attach API instances to"
+  type        = string
+  default     = ""
+}

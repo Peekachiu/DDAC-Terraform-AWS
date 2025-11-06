@@ -81,3 +81,15 @@ resource "aws_instance" "api" {
     Name = "${var.vpc_name}-api-${count.index + 1}"
   }
 }
+
+###############################################
+# Attach API Instances to Internal ALB
+###############################################
+resource "aws_lb_target_group_attachment" "api_attach" {
+  # Only create attachments if an ARN is provided
+  count = var.alb_target_group_arn != "" ? length(local.target_private_subnets) : 0
+
+  target_group_arn = var.alb_target_group_arn
+  target_id        = aws_instance.api[count.index].id
+  port             = 5000
+}
