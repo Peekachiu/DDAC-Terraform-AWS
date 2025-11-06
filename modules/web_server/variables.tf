@@ -1,5 +1,5 @@
 ###########################################################
-# VARIABLES — WEB SERVER MODULE
+# VARIABLES — WEB SERVER MODULE (ASG + Launch Template)
 ###########################################################
 
 variable "vpc_name" {
@@ -30,8 +30,9 @@ variable "instance_type" {
 }
 
 variable "key_name" {
-  description = "SSH key pair name for web servers"
+  description = "SSH key pair name for web servers (optional — set empty to use SSM only)"
   type        = string
+  default     = ""
 }
 
 variable "root_volume_size" {
@@ -41,7 +42,49 @@ variable "root_volume_size" {
 }
 
 variable "assign_eip" {
-  description = "Whether to assign Elastic IPs to web instances"
+  description = "Whether to assign Elastic IPs to web instances (discouraged for ASG-managed fleets)"
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "ami_id" {
+  description = "Optional AMI ID to use for instances. If empty, module will fetch latest Ubuntu 22.04 AMI (fallback). For deterministic plans, pass a fixed AMI ID."
+  type        = string
+  default     = ""
+}
+
+variable "asg_min_size" {
+  description = "ASG minimum size"
+  type        = number
+  default     = 1
+}
+
+variable "asg_max_size" {
+  description = "ASG maximum size"
+  type        = number
+  default     = 3
+}
+
+variable "asg_desired_capacity" {
+  description = "ASG desired capacity"
+  type        = number
+  default     = 1
+}
+
+variable "alb_target_group_arn" {
+  description = "Optional ALB target group ARN. If provided, ASG will register targets to this TG."
+  type        = string
+  default     = ""
+}
+
+variable "user_data" {
+  description = "Optional user data script to provision instances (base64 is not required). If empty, a minimal nginx bootstrap will be used."
+  type        = string
+  default     = ""
+}
+
+variable "tags" {
+  description = "Map of additional tags to apply to resources"
+  type        = map(string)
+  default     = {}
 }

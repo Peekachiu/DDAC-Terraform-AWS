@@ -30,6 +30,7 @@ variable "public_subnet_ids" {
 variable "web_instance_ids" {
   description = "List of web server instance IDs to attach to target group"
   type        = list(string)
+  default     = []
 }
 
 # Optional HTTPS Support

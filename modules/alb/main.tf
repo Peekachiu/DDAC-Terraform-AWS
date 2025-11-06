@@ -42,16 +42,6 @@ resource "aws_lb_target_group" "web_tg" {
 }
 
 ###############################################
-# Register Web Instances as Targets
-###############################################
-resource "aws_lb_target_group_attachment" "web_attach" {
-  count            = length(var.web_instance_ids)
-  target_group_arn = aws_lb_target_group.web_tg.arn
-  target_id        = var.web_instance_ids[count.index]
-  port             = 80
-}
-
-###############################################
 # ALB Listener (HTTP - Port 80)
 ###############################################
 resource "aws_lb_listener" "http_listener" {

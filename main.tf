@@ -101,7 +101,12 @@ module "web_server" {
   key_name          = var.key_name
   instance_type     = "t3.micro"
   root_volume_size  = 8
-  assign_eip        = true
+
+  # Pass the ALB target group ARN so the ASG registers instances
+  alb_target_group_arn = module.alb.web_tg_arn
+
+  # Disable per-instance EIPs for ASG-managed fleet
+  assign_eip        = false
 }
 
 ############################################################
@@ -114,7 +119,6 @@ module "alb" {
   vpc_id            = module.vpc.vpc_id
   lb_sg_id          = module.security_groups.lb_sg_id
   public_subnet_ids = module.vpc.public_subnet_ids
-  web_instance_ids  = module.web_server.web_instance_ids
 
   enable_https      = false    # 🔒 set to true later when you add ACM certificate
 }
