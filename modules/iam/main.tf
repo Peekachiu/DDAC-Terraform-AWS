@@ -89,17 +89,10 @@ data "aws_iam_instance_profile" "external" {
   name  = var.instance_profile_name
 }
 
-# Ensure Auto Scaling's service-linked role exists before ASG creation
-resource "aws_iam_service_linked_role" "autoscaling" {
-  # Service name required by AWS for the Auto Scaling service-linked role
-  aws_service_name = "autoscaling.amazonaws.com"
-
-  # Optional description
-  description = "Service-linked role for AWS Auto Scaling used by DDAC Auto Scaling Groups"
-}
-
+# Ensure Auto Scaling's service-linked role exists when manage_role = true
 resource "aws_iam_service_linked_role" "autoscaling" {
   count            = var.manage_role ? 1 : 0
   aws_service_name = "autoscaling.amazonaws.com"
   description      = "Service-linked role for AWS Auto Scaling used by DDAC Auto Scaling Groups"
 }
+
