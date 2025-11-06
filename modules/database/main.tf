@@ -3,7 +3,7 @@
 # This tells RDS which of your private subnets it can use.
 ###########################################################
 resource "aws_db_subnet_group" "db_subnet_group" {
-  name       = "${var.vpc_name}-db-subnet-group"
+  name       = lower("${var.vpc_name}-db-subnet-group")
   subnet_ids = var.private_subnet_ids
 
   tags = {
