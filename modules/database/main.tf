@@ -17,10 +17,9 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 ###########################################################
 resource "aws_db_instance" "db_instance" {
   identifier           = lower("${var.vpc_name}-db")
-  engine               = "sqlserver-ex" # SQL Server Standard Edition
-  engine_version       = "15.00.4345.5.v1" # SQL Server 2019
+  engine               = "mysql" # SQL Server Express Edition
+  engine_version       = "8.0.36" # SQL Server 2019
   instance_class       = "db.t3.small"    # Good for development/testing
-  license_model        = "license-included" # AWS handles SQL Server licensing
 
   allocated_storage    = 20 # 20 GB of storage
   storage_type         = "gp3"
@@ -37,7 +36,7 @@ resource "aws_db_instance" "db_instance" {
   db_subnet_group_name   = aws_db_subnet_group.db_subnet_group.name
   vpc_security_group_ids = [var.db_sg_id]
   publicly_accessible  = false # Kept secure in private subnets
-  port                   = 1433  # MSSQL Port
+  port                   = 3306 # MySQL default port
 
   # --- Backup & Maintenance ---
   backup_retention_period = 7

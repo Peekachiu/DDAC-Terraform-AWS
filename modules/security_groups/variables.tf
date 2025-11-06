@@ -41,5 +41,5 @@ variable "api_port" {
 variable "db_port" {
   description = "Database port (e.g., MySQL default is 3306)"
   type        = number
-  default     = 1433
+  default     = 3306
 }
