@@ -87,11 +87,6 @@ output "bastion_public_dns" {
 # =========================================================
 # Web Server Outputs
 # =========================================================
-output "web_instance_ids" {
-  description = "Instance IDs of web servers"
-  value       = module.web_server.web_instance_ids
-}
-
 output "web_asg_name" {
   description = "Auto Scaling Group name for web servers"
   value       = module.web_server.asg_name
