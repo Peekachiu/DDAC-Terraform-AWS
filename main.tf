@@ -94,6 +94,7 @@ module "bastion" {
 ############################################################
 module "web_server" {
   source            = "./modules/web_server"
+
   vpc_name          = var.vpc_name
   project_name      = var.project_name
   public_subnet_ids = module.vpc.public_subnet_ids
@@ -103,12 +104,18 @@ module "web_server" {
   root_volume_size  = 8
   iam_instance_profile_name = module.iam_web.instance_profile_name
 
+  # Auto Scaling settings — ensure one instance per AZ
+  asg_min_size         = 2
+  asg_desired_capacity = 2
+  asg_max_size         = 2
+
   # Pass the ALB target group ARN so the ASG registers instances
   alb_target_group_arn = module.alb.alb_target_group_arn
 
   # Ensure the Auto Scaling service-linked role exists before ASG creation
   depends_on = [module.iam_web]
 }
+
 
 ############################################################
 # Application Load Balancer Module

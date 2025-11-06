@@ -34,7 +34,7 @@ jobs:
         run: terraform init -reconfigure -upgrade
 
       - name: Verify Terraform State (for debugging)
-        run: terraform state list || echo "⚠️ No resources found in Terraform state."
+        run: terraform state list
 
       - name: Terraform Validate
         run: terraform validate
