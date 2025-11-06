@@ -103,7 +103,7 @@ module "web_server" {
   root_volume_size  = 8
 
   # Pass the ALB target group ARN so the ASG registers instances
-  alb_target_group_arn = module.alb.web_tg_arn
+  alb_target_group_arn = module.alb.alb_target_group_arn
 
   # Disable per-instance EIPs for ASG-managed fleet
   assign_eip        = false

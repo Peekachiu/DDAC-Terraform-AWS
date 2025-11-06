@@ -92,14 +92,20 @@ output "web_instance_ids" {
   value       = module.web_server.web_instance_ids
 }
 
-output "web_public_ips" {
-  description = "Public IPs of web servers"
-  value       = module.web_server.web_public_ips
+output "web_asg_name" {
+  description = "Auto Scaling Group name for web servers"
+  value       = module.web_server.asg_name
 }
 
-output "web_public_dns" {
-  description = "Public DNS names of web servers"
-  value       = module.web_server.web_public_dns
+output "web_instance_ids" {
+  description = "Instance IDs currently in the web ASG"
+  value       = module.web_server.web_instance_ids
+}
+
+# If you previously relied on per-instance EIPs (discouraged), this shows EIPs if assigned
+output "web_eip_addresses" {
+  description = "EIP addresses assigned to web instances (if assign_eip true)"
+  value       = module.web_server.web_eip_addresses
 }
 
 # =========================================================
