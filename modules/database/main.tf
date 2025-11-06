@@ -16,7 +16,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 # This creates the Multi-AZ (master/slave) database.
 ###########################################################
 resource "aws_db_instance" "db_instance" {
-  identifier           = "${var.vpc_name}-db"
+  identifier           = lower("${var.vpc_name}-db")
   engine               = "sqlserver-se" # SQL Server Standard Edition
   engine_version       = "15.00.4345.5.v1" # SQL Server 2019
   instance_class       = "db.t3.small"    # Good for development/testing
