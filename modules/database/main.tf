@@ -7,7 +7,7 @@ resource "aws_db_subnet_group" "db_subnet_group" {
   subnet_ids = var.private_subnet_ids
 
   tags = {
-  name       = lower("${var.vpc_name}-db-subnet-group")
+    name       = lower("${var.vpc_name}-db-subnet-group")
   }
 }
 
