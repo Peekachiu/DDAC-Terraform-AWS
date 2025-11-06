@@ -146,6 +146,7 @@ module "api" {
 ############################################################
 module "iam_web" {
   source                = "./modules/iam"
+  manage_role           = false
   role_name             = "DDAC-web-ec2-role"
   instance_profile_name = "DDAC-web-ec2-profile"
 }
