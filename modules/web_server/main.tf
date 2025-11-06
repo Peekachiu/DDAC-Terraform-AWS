@@ -130,19 +130,16 @@ resource "aws_autoscaling_group" "web_asg" {
   }
 }
 
-# Data source to fetch ASG instances for outputs
-data "aws_autoscaling_group" "web_asg" {
-  name = aws_autoscaling_group.web_asg.name
-}
-
-# Optional: create EIPs for instances (discouraged; kept for backwards compatibility)
+# Optional: EIPs for ASG instances (discouraged for autoscaling fleets)
 resource "aws_eip" "web_eip" {
-  count    = var.assign_eip && length(data.aws_autoscaling_group.web_asg.instances) > 0 ? length(data.aws_autoscaling_group.web_asg.instances) : 0
-  instance = data.aws_autoscaling_group.web_asg.instances[count.index].instance_id
+  count = var.assign_eip ? length(aws_autoscaling_group.web_asg.instances) : 0
+
+  instance = aws_autoscaling_group.web_asg.instances[count.index].instance_id
   domain   = "vpc"
 
   tags = local.common_tags
 }
+
 
 # (Optional) If you need instance-level provisioning beyond user_data,
 # consider integrating SSM Run Command / Fleet Manager or a configuration management tool.

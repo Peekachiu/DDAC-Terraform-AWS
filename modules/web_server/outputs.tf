@@ -1,16 +1,17 @@
-###########################################################
-# OUTPUTS — WEB SERVER MODULE (ASG)
-###########################################################
-
 output "asg_name" {
-  description = "Auto Scaling Group name"
+  description = "Name of the web ASG"
   value       = aws_autoscaling_group.web_asg.name
 }
 
 output "web_instance_ids" {
   description = "Instance IDs currently in the ASG"
-  # may be empty until instances exist
-  value       = data.aws_autoscaling_group.web_asg.instances[*].instance_id
+  value       = aws_autoscaling_group.web_asg.instances[*].instance_id
+}
+
+# If you still produce public IPs via the data.aws_instances (above), keep this:
+output "web_public_ips" {
+  description = "Public IPs of web instances (may be empty during plan)"
+  value       = length(data.aws_instances.web_instances) > 0 ? data.aws_instances.web_instances[0].public_ips : []
 }
 
 output "web_eip_addresses" {
