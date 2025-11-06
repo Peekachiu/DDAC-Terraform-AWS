@@ -167,23 +167,25 @@ module "internal_alb" {
 module "api" {
   source = "./modules/api"
 
-  vpc_name = var.vpc_name
+  vpc_name      = var.vpc_name
   instance_type = "t3.micro"
-  key_name = var.key_name
-  api_sg_id = module.security_groups.api_sg_id
+  key_name      = var.key_name
+  api_sg_id     = module.security_groups.api_sg_id
 
-  private_subnet_ids = [
-    module.vpc.private_subnets_map["private-subnet-1a"],
-    module.vpc.private_subnets_map["private-subnet-1b"],
-  ]
-
-  alb_target_group_arn = module.internal_alb.alb_target_group_arn
-
-  enable_alb_attachment = true
-
-  depends_on = [ module.security_groups ]
+  # Pass in ALL private subnets for the ASG to use
+  private_subnet_ids = module.vpc.private_subnet_ids
 
   root_volume_size = 8
+
+  # Pass the target group ARN directly to the ASG
+  alb_target_group_arn = module.internal_alb.alb_target_group_arn
+
+  # Add the new ASG variables
+  asg_min_size         = 2
+  asg_desired_capacity = 2
+  asg_max_size         = 2 // You can adjust these later
+
+  depends_on = [module.security_groups]
 }
 
 ############################################################

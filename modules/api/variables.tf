@@ -45,3 +45,21 @@ variable "enable_alb_attachment" {
   type        = bool
   default     = false
 }
+
+variable "asg_min_size" {
+  description = "Minimum number of API instances"
+  type        = number
+  default     = 2
+}
+
+variable "asg_max_size" {
+  description = "Maximum number of API instances"
+  type        = number
+  default     = 4
+}
+
+variable "asg_desired_capacity" {
+  description = "Desired number of API instances"
+  type        = number
+  default     = 2
+}
