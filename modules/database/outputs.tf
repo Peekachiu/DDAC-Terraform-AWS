@@ -16,3 +16,8 @@ output "db_name" {
   description = "The name of the database"
   value       = aws_db_instance.db_instance.db_name
 }
+
+output "db_address" {
+  description = "The hostname of the RDS instance (no port)"
+  value       = aws_db_instance.db_instance.address
+}

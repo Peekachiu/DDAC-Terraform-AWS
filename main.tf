@@ -238,7 +238,7 @@ resource "aws_secretsmanager_secret_version" "db_secret_val" {
   secret_string = jsonencode({
     username = var.db_username
     password = var.db_password
-    host     = module.database.db_endpoint
+    host     = module.database.db_address
     port     = module.database.db_port
     dbname   = var.db_name
     engine   = "mysql"
