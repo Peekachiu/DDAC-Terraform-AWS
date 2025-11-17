@@ -118,3 +118,11 @@ output "database_port" {
   description = "The connection port for the RDS database"
   value       = module.database.db_port
 }
+
+# =========================================================
+# Cloudfront Outputs
+# =========================================================
+output "cloudfront_url" {
+  description = "The URL of the CloudFront Distribution"
+  value       = "https://${module.cloudfront.cloudfront_domain_name}"
+}

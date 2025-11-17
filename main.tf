@@ -18,6 +18,10 @@ provider "aws" {
   region = var.aws_region
 }
 
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+}
 
 ############################################################
 # VPC Module
@@ -273,4 +277,26 @@ resource "aws_iam_role_policy" "api_secrets_policy" {
       }
     ]
   })
+}
+
+############################################################
+# WAF Module (Global - us-east-1)
+############################################################
+module "waf" {
+  source       = "./modules/waf"
+  project_name = var.project_name
+  
+  providers = {
+    aws = aws.us-east-1
+  }
+}
+
+############################################################
+# CloudFront Module
+############################################################
+module "cloudfront" {
+  source           = "./modules/cloudfront"
+  project_name     = var.project_name
+  alb_dns_name     = module.alb.alb_dns_name
+  waf_web_acl_arn  = module.waf.web_acl_arn
 }
