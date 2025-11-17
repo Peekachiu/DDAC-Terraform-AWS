@@ -34,18 +34,19 @@ resource "aws_launch_template" "api_lt" {
     associate_public_ip_address = false # IMPORTANT: Keep this false for private
   }
 
-  # User data to install Node.js API
+  # Updated User Data
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update -y
     apt-get upgrade -y
-    apt-get install -y curl git
+    # Install tools
     apt-get install -y unzip curl git jq
 
     # Install AWS CLI v2
-    curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o "awscliv2.zip"
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
-    
+    sudo ./aws/install  # <--- FIXED: Added this line
+
     # Install Node.js (LTS)
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
     apt-get install -y nodejs
@@ -54,13 +55,13 @@ resource "aws_launch_template" "api_lt" {
     mkdir -p /home/ubuntu/api
     cd /home/ubuntu/api
     
-# -------------------------------------------------------
+    # -------------------------------------------------------
     # 1. FETCH SECRETS
     # -------------------------------------------------------
-    # We use the instance's IAM role to fetch the secret JSON
+    # Fetch the secret JSON using the AWS CLI
     SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ${var.db_secret_name} --query SecretString --output text --region ap-southeast-1)
 
-    # Parse values using jq
+    # Parse values using jq and export them as Bash variables
     export DB_HOST=$(echo $SECRET_JSON | jq -r .host)
     export DB_USER=$(echo $SECRET_JSON | jq -r .username)
     export DB_PASS=$(echo $SECRET_JSON | jq -r .password)
@@ -70,19 +71,21 @@ resource "aws_launch_template" "api_lt" {
     # -------------------------------------------------------
     # 2. CREATE NODE.JS APP
     # -------------------------------------------------------
-    cat > index.js <<'APP'
+    # FIXED: Changed <<'APP' to <<APP (no quotes) so variables expand
+    cat > index.js <<APP
     const express = require('express');
     const mysql = require('mysql2');
     const app = express();
     const PORT = 5000;
 
     // Database Connection Config
+    // FIXED: Used $VAR syntax instead of ${VAR} to avoid Terraform errors
     const dbConfig = {
-      host: "${DB_HOST}",
-      user: "${DB_USER}",
-      password: "${DB_PASS}", 
-      database: "${DB_NAME}",
-      port: ${DB_PORT}
+      host: "$DB_HOST",
+      user: "$DB_USER",
+      password: "$DB_PASS", 
+      database: "$DB_NAME",
+      port: $DB_PORT
     };
 
     // Create a connection pool
