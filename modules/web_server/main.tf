@@ -30,7 +30,7 @@ locals {
   }, var.tags)
 
   # Define API_ENDPOINT. If empty, use a placeholder.
-  api_endpoint = var.api_alb_dns_name != "" ? "http://${var.api_alb_dns_name}" : "http://api-not-configured.internal"
+  api_endpoint = var.api_alb_dns_name != "" ? "http://${var.api_alb_dns_name}:5000" : "http://api-not-configured.internal"
 
   userdata_script = var.user_data != "" ? var.user_data : <<-EOF
     #!/bin/bash
