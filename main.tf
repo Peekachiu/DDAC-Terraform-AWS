@@ -182,7 +182,10 @@ module "api" {
   asg_desired_capacity = 2
   asg_max_size         = 2
 
-  depends_on = [module.security_groups]
+  iam_instance_profile_name = module.iam_api.instance_profile_name
+  db_secret_name = aws_secretsmanager_secret.db_secret.name
+
+  depends_on = [module.security_groups, module.database]
 }
 
 ############################################################
@@ -217,4 +220,57 @@ module "database" {
 
   # Ensure the security group exists before creating the DB
   depends_on = [module.security_groups]
+}
+
+############################################################
+# Create Secret for Database Credentials
+############################################################
+resource "aws_secretsmanager_secret" "db_secret" {
+  name        = "${var.vpc_name}-db-credentials-final"
+  description = "Database credentials for the API layer"
+  
+  # Force delete allows terraform destroy to work immediately
+  recovery_window_in_days = 0 
+}
+
+resource "aws_secretsmanager_secret_version" "db_secret_val" {
+  secret_id     = aws_secretsmanager_secret.db_secret.id
+  secret_string = jsonencode({
+    username = var.db_username
+    password = var.db_password
+    host     = module.database.db_endpoint
+    port     = module.database.db_port
+    dbname   = var.db_name
+    engine   = "mysql"
+  })
+}
+
+############################################################
+# Create IAM Role for API Layer
+############################################################
+module "iam_api" {
+  source                = "./modules/iam"
+  manage_role           = true
+  role_name             = "${var.project_name}-api-role"
+  instance_profile_name = "${var.project_name}-api-profile"
+  project               = var.project_name
+}
+
+############################################################
+# Grant API Role Permission to Read Secret
+############################################################
+resource "aws_iam_role_policy" "api_secrets_policy" {
+  name = "${var.project_name}-api-secrets-policy"
+  role = module.iam_api.role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "secretsmanager:GetSecretValue"
+        Resource = aws_secretsmanager_secret.db_secret.arn
+      }
+    ]
+  })
 }

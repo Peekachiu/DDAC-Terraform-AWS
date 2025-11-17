@@ -25,6 +25,10 @@ resource "aws_launch_template" "api_lt" {
   instance_type = var.instance_type
   key_name      = var.key_name
 
+  iam_instance_profile {
+    name = var.iam_instance_profile_name
+  }
+
   network_interfaces {
     security_groups             = [var.api_sg_id]
     associate_public_ip_address = false # IMPORTANT: Keep this false for private
@@ -36,6 +40,11 @@ resource "aws_launch_template" "api_lt" {
     apt-get update -y
     apt-get upgrade -y
     apt-get install -y curl git
+    apt-get install -y unzip curl git jq
+
+    # Install AWS CLI v2
+    curl -fsSL https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o "awscliv2.zip"
+    unzip awscliv2.zip
     
     # Install Node.js (LTS)
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
@@ -45,27 +54,68 @@ resource "aws_launch_template" "api_lt" {
     mkdir -p /home/ubuntu/api
     cd /home/ubuntu/api
     
+# -------------------------------------------------------
+    # 1. FETCH SECRETS
+    # -------------------------------------------------------
+    # We use the instance's IAM role to fetch the secret JSON
+    SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ${var.db_secret_name} --query SecretString --output text --region ap-southeast-1)
+
+    # Parse values using jq
+    export DB_HOST=$(echo $SECRET_JSON | jq -r .host)
+    export DB_USER=$(echo $SECRET_JSON | jq -r .username)
+    export DB_PASS=$(echo $SECRET_JSON | jq -r .password)
+    export DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)
+    export DB_PORT=$(echo $SECRET_JSON | jq -r .port)
+    
+    # -------------------------------------------------------
+    # 2. CREATE NODE.JS APP
+    # -------------------------------------------------------
     cat > index.js <<'APP'
     const express = require('express');
+    const mysql = require('mysql2');
     const app = express();
     const PORT = 5000;
-    
+
+    // Database Connection Config
+    const dbConfig = {
+      host: "${DB_HOST}",
+      user: "${DB_USER}",
+      password: "${DB_PASS}", 
+      database: "${DB_NAME}",
+      port: ${DB_PORT}
+    };
+
+    // Create a connection pool
+    const pool = mysql.createPool(dbConfig);
+
     app.get('/', (req, res) => {
-        res.send('Hello from Private Node.js API!');
+        res.send('<h1>DDAC API Layer</h1><p>Status: Running</p><a href="/db-test">Test Database Connection</a>');
     });
+
+    // Test DB Connection Endpoint
+    app.get('/db-test', (req, res) => {
+        pool.query('SELECT 1 + 1 AS solution', (error, results) => {
+            if (error) {
+                res.status(500).send('Database Connection Failed: ' + error.message);
+                return;
+            }
+            res.send('Database Connection Successful! Test Query Result: ' + results[0].solution);
+        });
+    });
+
     app.listen(PORT, '0.0.0.0', () => {
         console.log('API server running on port ' + PORT);
     });
     APP
     
-    # Initialize and run the app
+    # Initialize and install dependencies
     npm init -y
-    npm install express
+    npm install express mysql2
     
-    # Run the app in the background
-    nohup node /home/ubuntu/api/index.js > /home/ubuntu/api/output.log 2>&1 &
+    # Run the app
+    nohup node index.js > output.log 2>&1 &
     
-    echo "Node.js API server deployed successfully!" > /etc/motd
+    echo "API deployed with DB connection!" > /etc/motd
     EOF
   )
 
@@ -81,7 +131,7 @@ resource "aws_launch_template" "api_lt" {
   tag_specifications {
     resource_type = "instance"
     tags = {
-      Name = "${var.vpc_name}-api" // All instances will get this name
+      Name = "${var.vpc_name}-api"
     }
   }
 }

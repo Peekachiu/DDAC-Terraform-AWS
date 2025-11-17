@@ -63,3 +63,13 @@ variable "asg_desired_capacity" {
   type        = number
   default     = 2
 }
+
+variable "iam_instance_profile_name" {
+  description = "IAM Instance Profile to assign to API instances"
+  type        = string
+}
+
+variable "db_secret_name" {
+  description = "Name of the Secrets Manager secret to retrieve"
+  type        = string
+}
