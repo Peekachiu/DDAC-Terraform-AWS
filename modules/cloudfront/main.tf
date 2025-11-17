@@ -2,10 +2,10 @@
 # CloudFront Distribution
 ###########################################################
 resource "aws_cloudfront_distribution" "cdn" {
-  enabled             = true
-  is_ipv6_enabled     = true
-  web_acl_id          = var.waf_web_acl_arn
-  price_class         = "PriceClass_100" # Use PriceClass_All for global
+  enabled         = true
+  is_ipv6_enabled = true
+  web_acl_id      = var.waf_web_acl_arn
+  price_class     = "PriceClass_100" # Use PriceClass_All for global
 
   origin {
     domain_name = var.alb_dns_name
