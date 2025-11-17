@@ -34,7 +34,7 @@ resource "aws_launch_template" "api_lt" {
     associate_public_ip_address = false # IMPORTANT: Keep this false for private
   }
 
-# Updated User Data
+  # Updated User Data
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update -y
@@ -141,11 +141,11 @@ resource "aws_launch_template" "api_lt" {
 # API Server Auto Scaling Group
 ###############################################
 resource "aws_autoscaling_group" "api_asg" {
-  name                = "${var.vpc_name}-api-asg"
-  desired_capacity    = var.asg_desired_capacity
-  max_size            = var.asg_max_size
-  min_size            = var.asg_min_size
-  
+  name             = "${var.vpc_name}-api-asg"
+  desired_capacity = var.asg_desired_capacity
+  max_size         = var.asg_max_size
+  min_size         = var.asg_min_size
+
   # Deploy across all private subnets provided
   vpc_zone_identifier = var.private_subnet_ids
 

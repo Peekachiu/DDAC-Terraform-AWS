@@ -42,9 +42,9 @@ module "vpc" {
   ]
 
   # NAT Gateway Configuration
-  enable_nat_gateway = true          # Enables NAT Gateway for private subnet internet access
-  enable_multi_nat   = true          # Set to true if you want one NAT per AZ (for HA)
-  single_nat_index   = 0             # 0 = Use the first public subnet for NAT Gateway
+  enable_nat_gateway = true # Enables NAT Gateway for private subnet internet access
+  enable_multi_nat   = true # Set to true if you want one NAT per AZ (for HA)
+  single_nat_index   = 0    # 0 = Use the first public subnet for NAT Gateway
 }
 
 ############################################################
@@ -93,14 +93,14 @@ module "bastion" {
 # Web Server Module (Public Subnets, Multi-AZ)
 ############################################################
 module "web_server" {
-  source            = "./modules/web_server"
-  vpc_name          = var.vpc_name
-  project_name      = var.project_name
-  public_subnet_ids = module.vpc.public_subnet_ids
-  web_sg_id         = module.security_groups.web_sg_id
-  key_name          = var.key_name
-  instance_type     = "t3.micro"
-  root_volume_size  = 8
+  source                    = "./modules/web_server"
+  vpc_name                  = var.vpc_name
+  project_name              = var.project_name
+  public_subnet_ids         = module.vpc.public_subnet_ids
+  web_sg_id                 = module.security_groups.web_sg_id
+  key_name                  = var.key_name
+  instance_type             = "t3.micro"
+  root_volume_size          = 8
   iam_instance_profile_name = module.iam_web.instance_profile_name
 
   # Auto Scaling settings — ensure one instance per AZ
@@ -112,7 +112,7 @@ module "web_server" {
   alb_target_group_arn = module.alb.alb_target_group_arn
 
   # Pass in the new INTERNAL ALB's DNS name
-  api_alb_dns_name     = module.internal_alb.alb_dns_name
+  api_alb_dns_name = module.internal_alb.alb_dns_name
 
   # Ensure the Auto Scaling service-linked role exists before ASG creation
   depends_on = [module.iam_web]
@@ -123,47 +123,47 @@ module "web_server" {
 # Application Load Balancer Module
 ############################################################
 module "alb" {
-  source            = "./modules/alb"
-  project_name      = var.project_name
-  vpc_name          = var.vpc_name
-  vpc_id            = module.vpc.vpc_id
-  lb_sg_id          = module.security_groups.lb_sg_id
-  subnet_ids        = module.vpc.public_subnet_ids
-  name_prefix       = "web"
-  is_internal       = false
-  target_port       = 80
-  enable_https      = false    # 🔒 set to true later when you add ACM certificate
+  source       = "./modules/alb"
+  project_name = var.project_name
+  vpc_name     = var.vpc_name
+  vpc_id       = module.vpc.vpc_id
+  lb_sg_id     = module.security_groups.lb_sg_id
+  subnet_ids   = module.vpc.public_subnet_ids
+  name_prefix  = "web"
+  is_internal  = false
+  target_port  = 80
+  enable_https = false # 🔒 set to true later when you add ACM certificate
 }
 
 ############################################################
 # Application Load Balancer Module (INTERNAL - API)
 ############################################################
 module "internal_alb" {
-  source            = "./modules/alb"
-  project_name      = var.project_name
-  vpc_name          = var.vpc_name
-  vpc_id            = module.vpc.vpc_id
-  
+  source       = "./modules/alb"
+  project_name = var.project_name
+  vpc_name     = var.vpc_name
+  vpc_id       = module.vpc.vpc_id
+
   # Use the new API LB security group you created
-  lb_sg_id          = module.security_groups.api_lb_sg_id 
-  
+  lb_sg_id = module.security_groups.api_lb_sg_id
+
   # Use private subnets
-  subnet_ids        = [
+  subnet_ids = [
     module.vpc.private_subnets_map["private-subnet-1a"],
     module.vpc.private_subnets_map["private-subnet-1b"]
   ]
 
   # Use the new variables
-  name_prefix       = "api"
-  is_internal       = true
-  target_port       = 5000
+  name_prefix = "api"
+  is_internal = true
+  target_port = 5000
 }
 
 ############################################################
 # API Layer Module
 ############################################################
 module "api" {
-  source = "./modules/api"
+  source        = "./modules/api"
   vpc_name      = var.vpc_name
   instance_type = "t3.micro"
   key_name      = var.key_name
@@ -183,7 +183,7 @@ module "api" {
   asg_max_size         = 2
 
   iam_instance_profile_name = module.iam_api.instance_profile_name
-  db_secret_name = aws_secretsmanager_secret.db_secret.name
+  db_secret_name            = aws_secretsmanager_secret.db_secret.name
 
   depends_on = [module.security_groups, module.database]
 }
@@ -203,7 +203,7 @@ module "iam_web" {
 # Database Layer Module (RDS - MSSQL)
 ############################################################
 module "database" {
-  source = "./modules/database"
+  source       = "./modules/database"
   project_name = var.project_name
   vpc_name     = var.vpc_name
 
@@ -228,13 +228,13 @@ module "database" {
 resource "aws_secretsmanager_secret" "db_secret" {
   name        = "${var.vpc_name}-db-credentials-final"
   description = "Database credentials for the API layer"
-  
+
   # Force delete allows terraform destroy to work immediately
-  recovery_window_in_days = 0 
+  recovery_window_in_days = 0
 }
 
 resource "aws_secretsmanager_secret_version" "db_secret_val" {
-  secret_id     = aws_secretsmanager_secret.db_secret.id
+  secret_id = aws_secretsmanager_secret.db_secret.id
   secret_string = jsonencode({
     username = var.db_username
     password = var.db_password
@@ -267,8 +267,8 @@ resource "aws_iam_role_policy" "api_secrets_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = "secretsmanager:GetSecretValue"
+        Effect   = "Allow"
+        Action   = "secretsmanager:GetSecretValue"
         Resource = aws_secretsmanager_secret.db_secret.arn
       }
     ]

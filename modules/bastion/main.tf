@@ -29,12 +29,12 @@ locals {
 }
 
 resource "aws_instance" "bastion" {
-  count                  = length(local.target_subnets)
-  ami                    = data.aws_ami.ubuntu.id
-  instance_type          = var.instance_type
-  subnet_id              = local.target_subnets[count.index]
-  key_name               = var.key_name
-  vpc_security_group_ids = [var.bastion_sg_id]
+  count                       = length(local.target_subnets)
+  ami                         = data.aws_ami.ubuntu.id
+  instance_type               = var.instance_type
+  subnet_id                   = local.target_subnets[count.index]
+  key_name                    = var.key_name
+  vpc_security_group_ids      = [var.bastion_sg_id]
   associate_public_ip_address = true
 
   user_data = <<-EOF

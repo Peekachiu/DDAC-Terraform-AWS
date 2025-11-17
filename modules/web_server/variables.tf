@@ -3,7 +3,7 @@ variable "project_name" {
 }
 
 variable "vpc_name" {
-  type = string
+  type    = string
   default = ""
 }
 
