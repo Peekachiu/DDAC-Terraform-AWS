@@ -24,17 +24,40 @@ data "aws_ami" "ubuntu" {
 
 locals {
   ami_resolved = var.ami_id != "" ? var.ami_id : (length(data.aws_ami.ubuntu) > 0 ? data.aws_ami.ubuntu[0].id : "")
-  common_tags = merge({
+  common_tags  = merge({
     Project = var.project_name
     VPC     = var.vpc_name
   }, var.tags)
+  
+  # Define API_ENDPOINT. If empty, use a placeholder.
+  api_endpoint = var.api_alb_dns_name != "" ? "http://${var.api_alb_dns_name}" : "http://api-not-configured.internal"
+
   userdata_script = var.user_data != "" ? var.user_data : <<-EOF
     #!/bin/bash
     apt-get update -y
     apt-get install -y nginx
     systemctl enable nginx
-    systemctl start nginx
-    echo "<h1>DDAC Web Server - $(hostname)</h1>" > /var/www/html/index.html
+    
+    # Create a reverse proxy configuration for Nginx
+    # This will proxy ALL traffic to the API ALB
+    cat > /etc/nginx/sites-available/default <<NGINX_CONF
+    server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+        server_name _;
+
+        location / {
+            proxy_pass ${local.api_endpoint};
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        }
+    }
+    NGINX_CONF
+    
+    # Test Nginx config and restart
+    nginx -t
+    systemctl restart nginx
   EOF
 }
 
