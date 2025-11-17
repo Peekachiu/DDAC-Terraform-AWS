@@ -34,7 +34,7 @@ resource "aws_launch_template" "api_lt" {
     associate_public_ip_address = false # IMPORTANT: Keep this false for private
   }
 
-  # Updated User Data
+# Updated User Data
   user_data = base64encode(<<-EOF
     #!/bin/bash
     apt-get update -y
@@ -45,7 +45,7 @@ resource "aws_launch_template" "api_lt" {
     # Install AWS CLI v2
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
-    sudo ./aws/install  # <--- FIXED: Added this line
+    sudo ./aws/install
 
     # Install Node.js (LTS)
     curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
@@ -71,7 +71,6 @@ resource "aws_launch_template" "api_lt" {
     # -------------------------------------------------------
     # 2. CREATE NODE.JS APP
     # -------------------------------------------------------
-    # FIXED: Changed <<'APP' to <<APP (no quotes) so variables expand
     cat > index.js <<APP
     const express = require('express');
     const mysql = require('mysql2');
@@ -79,7 +78,6 @@ resource "aws_launch_template" "api_lt" {
     const PORT = 5000;
 
     // Database Connection Config
-    // FIXED: Used $VAR syntax instead of ${VAR} to avoid Terraform errors
     const dbConfig = {
       host: "$DB_HOST",
       user: "$DB_USER",
