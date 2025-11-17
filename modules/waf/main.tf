@@ -1,8 +1,7 @@
 resource "aws_wafv2_web_acl" "main" {
   name        = "${var.project_name}-web-acl"
   description = "WAF for CloudFront"
-  scope       = "CLOUDFRONT"  # Must be CLOUDFRONT for CDN
-  provider    = aws.us-east-1 # CloudFront WAF *must* be in us-east-1
+  scope       = "CLOUDFRONT" # Must be CLOUDFRONT for CDN
 
   default_action {
     allow {}
