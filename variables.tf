@@ -63,6 +63,6 @@ variable "db_username" {
 variable "db_password" {
   description = "Master password for the RDS database (must meet complexity requirements)"
   type        = string
-  default     = "Password1234!" # Please change this to a secure password
+  default     = "ddac1234!"
   sensitive   = true
 }
