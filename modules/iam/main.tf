@@ -90,9 +90,9 @@ data "aws_iam_instance_profile" "external" {
 }
 
 # Ensure Auto Scaling's service-linked role exists when manage_role = true
-resource "aws_iam_service_linked_role" "autoscaling" {
-  count            = var.manage_role ? 1 : 0
-  aws_service_name = "autoscaling.amazonaws.com"
-  description      = "Service-linked role for AWS Auto Scaling used by DDAC Auto Scaling Groups"
-}
+# resource "aws_iam_service_linked_role" "autoscaling" {
+#   count            = var.manage_role ? 1 : 0
+#   aws_service_name = "autoscaling.amazonaws.com"
+#   description      = "Service-linked role for AWS Auto Scaling used by DDAC Auto Scaling Groups"
+# }
 
