@@ -94,7 +94,6 @@ module "bastion" {
 ############################################################
 module "web_server" {
   source            = "./modules/web_server"
-
   vpc_name          = var.vpc_name
   project_name      = var.project_name
   public_subnet_ids = module.vpc.public_subnet_ids
@@ -133,7 +132,6 @@ module "alb" {
   name_prefix       = "web"
   is_internal       = false
   target_port       = 80
-
   enable_https      = false    # 🔒 set to true later when you add ACM certificate
 }
 
@@ -166,7 +164,6 @@ module "internal_alb" {
 ############################################################
 module "api" {
   source = "./modules/api"
-
   vpc_name      = var.vpc_name
   instance_type = "t3.micro"
   key_name      = var.key_name
@@ -204,7 +201,6 @@ module "iam_web" {
 ############################################################
 module "database" {
   source = "./modules/database"
-
   project_name = var.project_name
   vpc_name     = var.vpc_name
 
