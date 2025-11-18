@@ -1,0 +1,32 @@
+name: Manual Terraform Unlock
+
+on:
+  workflow_dispatch:
+    inputs:
+      lock_id:
+        description: 'The Lock ID to remove'
+        required: true
+
+jobs:
+  unlock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+        env:
+          AWS_REGION: ap-southeast-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Unlock State
+        run: |
+          terraform init
+          terraform force-unlock -force ${{ inputs.lock_id }}
