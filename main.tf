@@ -136,7 +136,7 @@ module "alb" {
   name_prefix  = "web"
   is_internal  = false
   target_port  = 80
-  enable_https = false # 🔒 set to true later when you add ACM certificate
+  enable_https = false
 }
 
 ############################################################
@@ -295,8 +295,43 @@ module "waf" {
 # CloudFront Module
 ############################################################
 module "cloudfront" {
-  source          = "./modules/cloudfront"
-  project_name    = var.project_name
-  alb_dns_name    = module.alb.alb_dns_name
-  waf_web_acl_arn = module.waf.web_acl_arn
+  source              = "./modules/cloudfront"
+  project_name        = var.project_name
+  alb_dns_name        = module.alb.alb_dns_name
+  waf_web_acl_arn     = module.waf.web_acl_arn
+  domain_name         = var.domain_name
+  acm_certificate_arn = module.acm.certificate_arn
+}
+
+############################################################
+# Route 53 & Certificate
+############################################################
+
+# 1. Get the Hosted Zone (Assumes you created it in console when buying domain)
+data "aws_route53_zone" "main" {
+  name = var.domain_name
+}
+
+# 2. Create Certificate
+module "acm" {
+  source      = "./modules/acm"
+  domain_name = var.domain_name
+  zone_id     = data.aws_route53_zone.main.zone_id
+  
+  providers = {
+    aws.us-east-1 = aws.us-east-1
+  }
+}
+
+# 3. Create DNS Record for CloudFront (The "A" Record)
+resource "aws_route53_record" "cdn_alias" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = var.domain_name
+  type    = "A"
+
+  alias {
+    name                   = module.cloudfront.cloudfront_domain_name
+    zone_id                = "Z2FDTNDATAQYW2" # This is the fixed Zone ID for CloudFront
+    evaluate_target_health = false
+  }
 }

@@ -66,3 +66,11 @@ variable "db_password" {
   default     = "ddac1234!"
   sensitive   = true
 }
+
+# =========================================================
+# Route 53 Variables
+# =========================================================
+variable "domain_name" {
+  description = "Your custom domain name (e.g., ddac-test.click)"
+  type        = string
+}

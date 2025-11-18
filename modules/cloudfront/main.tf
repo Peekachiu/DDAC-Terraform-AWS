@@ -6,6 +6,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   is_ipv6_enabled = true
   web_acl_id      = var.waf_web_acl_arn
   price_class     = "PriceClass_100" # Use PriceClass_All for global
+  aliases = var.domain_name != "" ? [var.domain_name] : []
 
   origin {
     domain_name = var.alb_dns_name
@@ -46,7 +47,10 @@ resource "aws_cloudfront_distribution" "cdn" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    cloudfront_default_certificate = var.acm_certificate_arn == "" ? true : false
+    acm_certificate_arn            = var.acm_certificate_arn != "" ? var.acm_certificate_arn : null
+    ssl_support_method             = var.acm_certificate_arn != "" ? "sni-only" : null
+    minimum_protocol_version       = "TLSv1.2_2021"
   }
 
   tags = {
