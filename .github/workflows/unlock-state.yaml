@@ -1,4 +1,4 @@
-name: Manual Terraform Unlock
+name: Terraform Unlock State
 
 on:
   workflow_dispatch:
