@@ -6,7 +6,7 @@ resource "aws_cloudfront_distribution" "cdn" {
   is_ipv6_enabled = true
   web_acl_id      = var.waf_web_acl_arn
   price_class     = "PriceClass_100" # Use PriceClass_All for global
-  aliases = var.domain_name != "" ? [var.domain_name] : []
+  aliases         = var.domain_name != "" ? [var.domain_name] : []
 
   origin {
     domain_name = var.alb_dns_name

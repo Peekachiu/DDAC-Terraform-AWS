@@ -317,7 +317,7 @@ module "acm" {
   source      = "./modules/acm"
   domain_name = var.domain_name
   zone_id     = data.aws_route53_zone.main.zone_id
-  
+
   providers = {
     aws.us-east-1 = aws.us-east-1
   }
