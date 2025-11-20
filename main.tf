@@ -350,5 +350,5 @@ module "cloudwatch" {
   web_asg_name     = module.web_server.asg_name
   api_instance_ids = module.api.instance_ids
   alb_arn_suffix   = module.alb.alb_arn_suffix
-  db_instance_id   = module.db.db_instance_identifier
+  db_instance_id   = module.database.db_instance_identifier
 }

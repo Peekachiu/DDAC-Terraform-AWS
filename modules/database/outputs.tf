@@ -23,5 +23,5 @@ output "db_address" {
 }
 
 output "db_instance_identifier" {
-  value = aws_db_instance.default.identifier
+  value = aws_db_instance.db_instance.identifier
 }
