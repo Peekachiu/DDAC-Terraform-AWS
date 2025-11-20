@@ -42,5 +42,6 @@ jobs:
       - name: Terraform Destroy (Auto Approve)
         env:
           TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-          TF_VAR_domain_name: "residentpro.click"  # <--- ADD THIS LINE
+          TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
+          TF_VAR_domain_name: "residentpro.click"
         run: terraform destroy -auto-approve

@@ -74,3 +74,11 @@ variable "domain_name" {
   description = "Your custom domain name (e.g., ddac-test.click)"
   type        = string
 }
+
+# =========================================================
+# Cloudwatch Variables
+# =========================================================
+variable "alert_email" {
+  description = "Your email address for CloudWatch alerts"
+  type        = string
+}
