@@ -89,6 +89,22 @@ resource "aws_cloudwatch_dashboard" "main" {
           region  = "ap-southeast-1"
           title   = "Public Traffic Volume"
         }
+      },
+      {
+        type   = "metric",
+        x      = 12,
+        y      = 6,
+        width  = 12,
+        height = 6,
+        properties = {
+          metrics = [
+            ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", var.api_asg_name, { "label" : "API Tier CPU" }]
+          ],
+          view    = "timeSeries",
+          stacked = false,
+          region  = "ap-southeast-1",
+          title   = "API Server CPU Usage"
+        }
       }
     ]
   })

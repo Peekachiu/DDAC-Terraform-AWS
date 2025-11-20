@@ -347,8 +347,8 @@ module "cloudwatch" {
   alert_email  = var.alert_email
 
   # Passing data from other modules
-  web_asg_name     = module.web_server.asg_name
-  api_instance_ids = module.api.instance_ids
-  alb_arn_suffix   = module.alb.alb_arn_suffix
-  db_instance_id   = module.database.db_instance_identifier
+  web_asg_name   = module.web_server.asg_name
+  alb_arn_suffix = module.alb.alb_arn_suffix
+  db_instance_id = module.database.db_instance_identifier
+  api_asg_name   = module.api.asg_name
 }

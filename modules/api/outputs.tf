@@ -6,7 +6,3 @@ output "asg_name" {
   description = "Auto Scaling Group name for API servers"
   value       = aws_autoscaling_group.api_asg.name
 }
-
-output "instance_ids" {
-  value = aws_instance.api[*].id
-}
