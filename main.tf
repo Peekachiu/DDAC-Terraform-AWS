@@ -343,9 +343,9 @@ resource "aws_route53_record" "cdn_alias" {
 module "cloudwatch" {
   source = "./modules/cloudwatch"
 
-  project_name     = var.project_name
-  alert_email      = var.alert_email
-  
+  project_name = var.project_name
+  alert_email  = var.alert_email
+
   # Passing data from other modules
   web_asg_name     = module.web_server.asg_name
   api_instance_ids = module.api.instance_ids

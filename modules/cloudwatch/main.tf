@@ -22,7 +22,7 @@ resource "aws_cloudwatch_metric_alarm" "web_cpu_high" {
   namespace           = "AWS/EC2"
   period              = "120" # Check every 2 minutes
   statistic           = "Average"
-  threshold           = "80"  # Trigger if CPU > 80%
+  threshold           = "80" # Trigger if CPU > 80%
   alarm_description   = "This metric monitors Web ASG CPU utilization"
   actions_enabled     = true
 
@@ -50,7 +50,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         height = 6
         properties = {
           metrics = [
-            [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", var.web_asg_name, { "label": "Web Tier CPU" } ]
+            ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", var.web_asg_name, { "label" : "Web Tier CPU" }]
           ]
           view    = "timeSeries"
           stacked = false
@@ -66,7 +66,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         height = 6
         properties = {
           metrics = [
-            [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", var.db_instance_id, { "label": "Database CPU" } ]
+            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", var.db_instance_id, { "label" : "Database CPU" }]
           ]
           view    = "timeSeries"
           stacked = false
@@ -82,7 +82,7 @@ resource "aws_cloudwatch_dashboard" "main" {
         height = 6
         properties = {
           metrics = [
-            [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", var.alb_arn_suffix, { "label": "Total Requests" } ]
+            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", var.alb_arn_suffix, { "label" : "Total Requests" }]
           ]
           view    = "timeSeries"
           stacked = false
