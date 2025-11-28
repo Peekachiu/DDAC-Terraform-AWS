@@ -24,7 +24,7 @@ data "aws_ami" "ubuntu" {
 
 locals {
   ami_resolved = var.ami_id != "" ? var.ami_id : (length(data.aws_ami.ubuntu) > 0 ? data.aws_ami.ubuntu[0].id : "")
-  common_tags  = merge({
+  common_tags = merge({
     Project = var.project_name
     VPC     = var.vpc_name
   }, var.tags)
