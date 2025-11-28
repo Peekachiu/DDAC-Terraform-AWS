@@ -24,40 +24,59 @@ data "aws_ami" "ubuntu" {
 
 locals {
   ami_resolved = var.ami_id != "" ? var.ami_id : (length(data.aws_ami.ubuntu) > 0 ? data.aws_ami.ubuntu[0].id : "")
-  common_tags = merge({
+  common_tags  = merge({
     Project = var.project_name
     VPC     = var.vpc_name
   }, var.tags)
 
-  # Define API_ENDPOINT. If empty, use a placeholder.
-  api_endpoint = var.api_alb_dns_name != "" ? "http://${var.api_alb_dns_name}:5000" : "http://api-not-configured.internal"
+  # Internal ALB DNS (Backend)
+  api_endpoint = var.api_alb_dns_name != "" ? "http://${var.api_alb_dns_name}:5000" : "http://localhost:5000"
 
   userdata_script = var.user_data != "" ? var.user_data : <<-EOF
     #!/bin/bash
     apt-get update -y
-    apt-get install -y nginx
+    # Install Docker & Nginx
+    apt-get install -y docker.io nginx
+    systemctl start docker
+    systemctl enable docker
     systemctl enable nginx
-    
-    # Create a reverse proxy configuration for Nginx
-    # This will proxy ALL traffic to the API ALB
+
+    # 1. RUN FRONTEND CONTAINER
+    # Replace with your actual Docker Hub image
+    # Assuming your frontend container listens on port 3000 internally
+    docker run -d \
+      --restart always \
+      --name frontend-app \
+      -p 3000:3000 \
+      peekachiu/ddac-frontend:latest
+
+    # 2. CONFIGURE NGINX (The Reverse Proxy)
     cat > /etc/nginx/sites-available/default <<NGINX_CONF
     server {
         listen 80 default_server;
-        listen [::]:80 default_server;
         server_name _;
 
-        location / {
+        # Route 1: Forward API requests to the Backend ALB
+        location /api {
             proxy_pass ${local.api_endpoint};
             proxy_set_header Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        }
+
+        # Route 2: Forward all other requests to the local Frontend Container
+        location / {
+            proxy_pass http://localhost:3000;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
         }
     }
     NGINX_CONF
     
-    # Test Nginx config and restart
+    # Restart Nginx to apply changes
     nginx -t
     systemctl restart nginx
+    
+    echo "Frontend Deployed!" > /etc/motd
   EOF
 }
 

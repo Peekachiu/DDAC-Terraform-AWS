@@ -36,87 +36,42 @@ resource "aws_launch_template" "api_lt" {
 
   # Updated User Data
   user_data = base64encode(<<-EOF
-    #!/bin/bash
+  #!/bin/bash
     apt-get update -y
     apt-get upgrade -y
-    # Install tools
-    apt-get install -y unzip curl git jq
-
+    # Install Docker & AWS CLI
+    apt-get install -y docker.io awscli jq unzip
+    systemctl start docker
+    systemctl enable docker
+    
     # Install AWS CLI v2
     curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
     unzip awscliv2.zip
     sudo ./aws/install
 
-    # Install Node.js (LTS)
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-    apt-get install -y nodejs
-    
-    # Create a simple Express API
-    mkdir -p /home/ubuntu/api
-    cd /home/ubuntu/api
-    
-    # -------------------------------------------------------
-    # 1. FETCH SECRETS
-    # -------------------------------------------------------
-    # Fetch the secret JSON using the AWS CLI
+    # 1. FETCH DATABASE SECRETS (From Secrets Manager)
     SECRET_JSON=$(aws secretsmanager get-secret-value --secret-id ${var.db_secret_name} --query SecretString --output text --region ap-southeast-1)
-
-    # Parse values using jq and export them as Bash variables
+    
     export DB_HOST=$(echo $SECRET_JSON | jq -r .host)
     export DB_USER=$(echo $SECRET_JSON | jq -r .username)
     export DB_PASS=$(echo $SECRET_JSON | jq -r .password)
     export DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)
     export DB_PORT=$(echo $SECRET_JSON | jq -r .port)
-    
-    # -------------------------------------------------------
-    # 2. CREATE NODE.JS APP
-    # -------------------------------------------------------
-    cat > index.js <<APP
-    const express = require('express');
-    const mysql = require('mysql2');
-    const app = express();
-    const PORT = 5000;
 
-    // Database Connection Config
-    const dbConfig = {
-      host: "$DB_HOST",
-      user: "$DB_USER",
-      password: "$DB_PASS", 
-      database: "$DB_NAME",
-      port: $DB_PORT
-    };
-
-    // Create a connection pool
-    const pool = mysql.createPool(dbConfig);
-
-    app.get('/', (req, res) => {
-        res.send('<h1>DDAC API Layer</h1><p>Status: Running</p><a href="/db-test">Test Database Connection</a>');
-    });
-
-    // Test DB Connection Endpoint
-    app.get('/db-test', (req, res) => {
-        pool.query('SELECT 1 + 1 AS solution', (error, results) => {
-            if (error) {
-                res.status(500).send('Database Connection Failed: ' + error.message);
-                return;
-            }
-            res.send('Database Connection Successful! Test Query Result: ' + results[0].solution);
-        });
-    });
-
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log('API server running on port ' + PORT);
-    });
-    APP
-    
-    # Initialize and install dependencies
-    npm init -y
-    npm install express mysql2
-    
-    # Run the app
-    nohup node index.js > output.log 2>&1 &
-    
-    echo "API deployed with DB connection!" > /etc/motd
+    # 2. RUN BACKEND CONTAINER
+    # Replace 'peekachiu/ddac-backend:latest' with your real image
+    docker run -d \
+      --restart always \
+      --name backend-app \
+      -p 5000:5000 \
+      -e DB_HOST=$DB_HOST \
+      -e DB_USER=$DB_USER \
+      -e DB_PASS=$DB_PASS \
+      -e DB_NAME=$DB_NAME \
+      -e DB_PORT=$DB_PORT \
+      peekachiu/ddac-backend:latest
+      
+    echo "Backend Container Started!" > /etc/motd
     EOF
   )
 
