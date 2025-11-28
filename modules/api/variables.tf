@@ -25,7 +25,7 @@ variable "key_name" {
 variable "instance_type" {
   description = "EC2 instance type for API layer"
   type        = string
-  default     = "t3.micro"
+  default     = "t3.small"
 }
 
 variable "root_volume_size" {
@@ -55,7 +55,7 @@ variable "asg_min_size" {
 variable "asg_max_size" {
   description = "Maximum number of API instances"
   type        = number
-  default     = 4
+  default     = 2
 }
 
 variable "asg_desired_capacity" {
