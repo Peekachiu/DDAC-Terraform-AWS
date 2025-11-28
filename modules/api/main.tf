@@ -58,12 +58,17 @@ resource "aws_launch_template" "api_lt" {
     export DB_NAME=$(echo $SECRET_JSON | jq -r .dbname)
     export DB_PORT=$(echo $SECRET_JSON | jq -r .port)
 
-    # 2. RUN BACKEND CONTAINER
+    # 2. CONSTRUCT .NET Connection string
+    CONN_STRING="Server=$DB_HOST;Database=$DB_NAME;User=$DB_USER;Password=$DB_PASS;"
+
+    # 3. RUN BACKEND CONTAINER
     # Replace 'peekachiu/ddac-backend:latest' with your real image
     docker run -d \
       --restart always \
       --name backend-app \
       -p 5000:5000 \
+      -e ConnectionStrings__DefaultConnection=$CONN_STRING \
+      -e ASPNETCORE_ENVIRONMENT=Production \
       -e DB_HOST=$DB_HOST \
       -e DB_USER=$DB_USER \
       -e DB_PASS=$DB_PASS \
