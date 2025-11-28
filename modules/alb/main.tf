@@ -30,7 +30,7 @@ resource "aws_lb_target_group" "tg" {
   health_check {
     enabled             = true
     path                = "/api/"
-    matcher             = "200-399"
+    matcher             = "200-499"
     interval            = 30
     healthy_threshold   = 3
     unhealthy_threshold = 2
