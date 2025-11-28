@@ -173,7 +173,7 @@ module "api" {
   instance_type  = "t3.micro"
   key_name       = var.key_name
   api_sg_id      = module.security_groups.api_sg_id
-  log_group_name = module.cloudwatch.web_log_group_name
+  log_group_name = module.cloudwatch.api_log_group_name
 
   # Pass in ALL private subnets for the ASG to use
   private_subnet_ids = module.vpc.private_subnet_ids
