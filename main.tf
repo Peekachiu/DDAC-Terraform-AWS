@@ -170,7 +170,7 @@ module "internal_alb" {
 module "api" {
   source         = "./modules/api"
   vpc_name       = var.vpc_name
-  instance_type  = "t3.micro"
+  instance_type  = "t3.small"
   key_name       = var.key_name
   api_sg_id      = module.security_groups.api_sg_id
   log_group_name = module.cloudwatch.api_log_group_name
