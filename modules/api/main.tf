@@ -66,7 +66,7 @@ resource "aws_launch_template" "api_lt" {
     docker run -d \
       --restart always \
       --name backend-app \
-      -p 5000:5000 \
+      -p 5000:80 \
       -e ConnectionStrings__DefaultConnection=$CONN_STRING \
       -e ASPNETCORE_ENVIRONMENT=Production \
       -e DB_HOST=$DB_HOST \
