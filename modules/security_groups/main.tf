@@ -112,8 +112,8 @@ resource "aws_security_group" "db_sg" {
 
   ingress {
     description     = "Allow SSH from Bastion Host"
-    from_port       = 22
-    to_port         = 22
+    from_port       = var.db_port
+    to_port         = var.db_port
     protocol        = "tcp"
     security_groups = [aws_security_group.bastion_sg.id]
   }
