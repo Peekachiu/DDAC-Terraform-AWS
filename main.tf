@@ -103,7 +103,7 @@ module "web_server" {
   public_subnet_ids         = module.vpc.public_subnet_ids
   web_sg_id                 = module.security_groups.web_sg_id
   key_name                  = var.key_name
-  instance_type             = "t3.medium"
+  instance_type             = "t3.small"
   root_volume_size          = 20
   iam_instance_profile_name = module.iam_web.instance_profile_name
   log_group_name            = module.cloudwatch.web_log_group_name
