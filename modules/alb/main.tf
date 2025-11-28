@@ -29,7 +29,7 @@ resource "aws_lb_target_group" "tg" {
 
   health_check {
     enabled             = true
-    path                = "/"
+    path                = "/api/Dashboard/resident-stats"
     matcher             = "200-399"
     interval            = 30
     healthy_threshold   = 3
