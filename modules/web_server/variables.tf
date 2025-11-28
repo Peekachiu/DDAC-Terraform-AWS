@@ -85,3 +85,8 @@ variable "api_alb_dns_name" {
   type        = string
   default     = ""
 }
+
+variable "log_group_name" {
+  description = "CloudWatch Log Group name for application logs"
+  type        = string
+}

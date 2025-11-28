@@ -74,6 +74,10 @@ resource "aws_launch_template" "api_lt" {
       -e DB_PASS=$DB_PASS \
       -e DB_NAME=$DB_NAME \
       -e DB_PORT=$DB_PORT \
+      --log-driver=awslogs \
+      --log-opt awslogs-region=ap-southeast-1 \
+      --log-opt awslogs-group=${var.log_group_name} \
+      --log-opt awslogs-stream=api-instance-$(hostname) \
       peekachiu/ddac-backend:latest
       
     echo "Backend Container Started!" > /etc/motd

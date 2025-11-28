@@ -73,3 +73,8 @@ variable "db_secret_name" {
   description = "Name of the Secrets Manager secret to retrieve"
   type        = string
 }
+
+variable "log_group_name" {
+  description = "CloudWatch Log Group name for application logs"
+  type        = string
+}

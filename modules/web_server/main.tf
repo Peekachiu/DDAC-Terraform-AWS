@@ -48,6 +48,10 @@ locals {
       --restart always \
       --name frontend-app \
       -p 3000:3000 \
+      --log-driver=awslogs \
+      --log-opt awslogs-region=ap-southeast-1 \
+      --log-opt awslogs-group=${var.log_group_name} \
+      --log-opt awslogs-stream=web-instance-$(hostname) \
       peekachiu/ddac-frontend:latest
 
     # 2. CONFIGURE NGINX (The Reverse Proxy)

@@ -106,6 +106,7 @@ module "web_server" {
   instance_type             = "t3.micro"
   root_volume_size          = 8
   iam_instance_profile_name = module.iam_web.instance_profile_name
+  log_group_name            = module.cloudwatch.web_log_group_name
 
   # Auto Scaling settings — ensure one instance per AZ
   asg_min_size         = 2
@@ -167,11 +168,12 @@ module "internal_alb" {
 # API Layer Module
 ############################################################
 module "api" {
-  source        = "./modules/api"
-  vpc_name      = var.vpc_name
-  instance_type = "t3.micro"
-  key_name      = var.key_name
-  api_sg_id     = module.security_groups.api_sg_id
+  source         = "./modules/api"
+  vpc_name       = var.vpc_name
+  instance_type  = "t3.micro"
+  key_name       = var.key_name
+  api_sg_id      = module.security_groups.api_sg_id
+  log_group_name = module.cloudwatch.web_log_group_name
 
   # Pass in ALL private subnets for the ASG to use
   private_subnet_ids = module.vpc.private_subnet_ids
