@@ -52,7 +52,7 @@ locals {
       --log-opt awslogs-region=ap-southeast-1 \
       --log-opt awslogs-group=${var.log_group_name} \
       --log-opt awslogs-stream=web-instance-$(hostname) \
-      peekachiu/ddac-frontend:latest
+      peekachiu/ddac-frontend:Production
 
     # 2. CONFIGURE NGINX (The Reverse Proxy)
     cat > /etc/nginx/sites-available/default <<NGINX_CONF
